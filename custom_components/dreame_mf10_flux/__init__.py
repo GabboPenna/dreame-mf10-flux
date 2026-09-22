@@ -60,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: FluxEntry) -> bool:
     except BaseException:
         _release(hass, key)
         raise
-    entry.async_on_unload(entry.add_update_listener(_options_updated))
+    entry.async_on_unload(entry.add_update_listener(_entry_updated))
     return True
 
 
@@ -72,7 +72,8 @@ def _release(hass: HomeAssistant, key: str) -> None:
         del accounts[key]
 
 
-async def _options_updated(hass: HomeAssistant, entry: FluxEntry) -> None:
+async def _entry_updated(hass: HomeAssistant, entry: FluxEntry) -> None:
+    """Reload once when polling options or shared account credentials change."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 

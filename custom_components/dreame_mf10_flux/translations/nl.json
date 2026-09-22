@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Meld je opnieuw aan met het account dat aan deze ventilator is gekoppeld.",
+        "description": "Log opnieuw in met het account dat aan deze ventilator is gekoppeld. De bijgewerkte inloggegevens worden ook gebruikt voor andere geverifieerde ventilatoren van hetzelfde account en in dezelfde regio.",
         "data": {
           "username": "E-mail",
           "password": "Wachtwoord",

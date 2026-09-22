@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Entre novamente com a conta vinculada a este ventilador.",
+        "description": "Entre novamente com a conta vinculada a este ventilador. As credenciais atualizadas também serão usadas nos outros ventiladores verificados da mesma conta e região.",
         "data": {
           "username": "E-mail",
           "password": "Senha",

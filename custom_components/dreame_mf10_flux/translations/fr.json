@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Reconnectez-vous avec le compte associé à ce ventilateur.",
+        "description": "Reconnectez-vous avec le compte associé à ce ventilateur. Les nouveaux identifiants seront aussi utilisés pour les autres ventilateurs vérifiés du même compte et de la même région.",
         "data": {
           "username": "E-mail",
           "password": "Mot de passe",

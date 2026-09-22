@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Vuelve a iniciar sesión con la cuenta vinculada a este ventilador.",
+        "description": "Vuelve a iniciar sesión con la cuenta vinculada a este ventilador. Las credenciales actualizadas también se usarán para los demás ventiladores verificados de la misma cuenta y región.",
         "data": {
           "username": "Correo electrónico",
           "password": "Contraseña",

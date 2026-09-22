@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Accedi di nuovo con l’account collegato a questo ventilatore.",
+        "description": "Accedi nuovamente con l'account collegato a questo ventilatore. L'accesso verrà aggiornato anche per gli altri ventilatori verificati dello stesso account e della stessa regione.",
         "data": {
           "username": "Email",
           "password": "Password",

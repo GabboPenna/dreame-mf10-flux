@@ -25,6 +25,16 @@ async def async_get_config_entry_diagnostics(
         if coordinator.last_exception
         else None,
         "last_poll_ms": coordinator.last_poll_ms,
+        "last_successful_update": coordinator.last_successful_update.isoformat()
+        if coordinator.last_successful_update
+        else None,
+        "consecutive_update_failures": coordinator.consecutive_update_failures,
+        "last_command_ms": coordinator.last_command_ms,
+        "last_command_success": coordinator.last_command_success,
+        "last_command_error": coordinator.last_command_error,
+        "commands": coordinator.commands,
+        "command_failures": coordinator.command_failures,
+        "consecutive_command_failures": coordinator.consecutive_command_failures,
         "requests": coordinator.client.requests,
         "state": asdict(coordinator.data) if coordinator.data else None,
     }

@@ -51,6 +51,11 @@ Home Assistant `custom_components` directory and restart Home Assistant.
 Setting a speed selects Manual mode. The fan's oscillation toggle selects both
 blades or stops them; use the blade-oscillation selector for the full set of modes.
 Automation values remain stable when you change the Home Assistant language.
+If a turn-on action specifies both a speed and an automatic preset, the preset
+takes priority and chooses its own speed.
+
+Fans use their names from Dreamehome, including later name changes. A name you
+set manually in Home Assistant takes priority. Existing entity IDs stay unchanged.
 
 ## Languages
 
@@ -70,13 +75,20 @@ All entities share one property request every 30 seconds. You can change the
 interval from 10 to 300 seconds in the integration options. Account device status
 is cached for at most 60 seconds across fans on the same account.
 
-A command groups related property changes and performs one confirmation read.
+A command groups related property changes and checks the reported values against
+the requested state. It normally needs one confirmation read; if the cloud still
+reports an older state, Flux makes up to two additional reads, waiting 0.5 and
+1 second respectively. A mismatch reports a command error while keeping the
+actual state visible. Rapid commands are processed in order, including deciding
+whether a speed change needs to turn the fan back on.
 Synchronized and staggered blade movement use two ordered writes because the
 firmware resets those flags when blade movement changes.
 Unchanged snapshots do not trigger extra state updates. Token renewal is shared
 across simultaneous requests, HTTP connections are reused, and all network calls
 have time limits. Read operations may retry once; an uncertain write is never
-automatically repeated. Rate-limit responses pause further cloud requests.
+automatically repeated. After an uncertain or partially accepted write, Flux
+tries one state refresh. Authentication failures and rate limits stop follow-up
+reads; rate-limit responses pause further cloud requests.
 
 Cloud latency, cloud caches and firmware behavior still affect update times.
 The connectivity sensor reflects the cloud's knowledge, not a local network probe.
@@ -88,10 +100,18 @@ in backups. Protect access to your Home Assistant configuration and backups.
 Flux does not add a separate encryption layer. Session tokens stay in memory.
 
 Diagnostics contain only operational state, firmware, region and timing counters.
+They include the last successful cloud update in UTC, consecutive update failures,
+command duration and outcome, and total/consecutive command failures. Command
+timings include writes and confirmation, excluding time waiting for an earlier
+command. Counters reset when the integration reloads; request counts cover the
+shared account, while command and update counters belong to each fan.
 They omit account names, passwords, tokens, device identifiers and MAC addresses.
 There is no analytics or telemetry service.
 
-If authentication expires, Home Assistant offers reauthentication. If no fan is
+If authentication expires, Home Assistant offers reauthentication. Signing in
+again also updates other configured fans with the same account and region, but
+only if the cloud confirms they belong to that account. Disabled entries remain
+disabled; other accounts and regions are unchanged. If no fan is
 found, check the account region and that the device is linked in Dreamehome.
 Only MF10 devices are offered during setup. Cloud outages are retried through
 Home Assistant; do not delete and recreate the integration to recover a session.

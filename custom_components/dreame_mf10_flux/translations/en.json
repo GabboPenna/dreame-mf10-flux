@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Sign in again with the account linked to this fan.",
+        "description": "Sign in again with the account linked to this fan. The updated sign-in will also be used for other verified fans on the same account and region.",
         "data": {
           "username": "Email",
           "password": "Password",

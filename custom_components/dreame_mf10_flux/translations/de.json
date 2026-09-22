@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Melde dich erneut mit dem mit diesem Ventilator verknüpften Konto an.",
+        "description": "Melde dich erneut mit dem Konto an, das mit diesem Ventilator verknüpft ist. Die aktualisierten Anmeldedaten werden auch für andere bestätigte Ventilatoren desselben Kontos und derselben Region verwendet.",
         "data": {
           "username": "E-Mail",
           "password": "Passwort",

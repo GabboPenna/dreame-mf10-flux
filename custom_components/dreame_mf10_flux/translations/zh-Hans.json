@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "请使用与此风扇绑定的账户重新登录。",
+        "description": "请重新登录与此风扇关联的账号。更新后的登录信息也将用于同一账号和地区下其他已验证的风扇。",
         "data": {
           "username": "电子邮箱",
           "password": "密码",

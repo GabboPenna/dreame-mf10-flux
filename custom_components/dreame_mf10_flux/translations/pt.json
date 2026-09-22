@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Inicie sessão novamente com a conta associada a esta ventoinha.",
+        "description": "Inicie sessão novamente com a conta associada a esta ventoinha. As credenciais atualizadas também serão utilizadas nas outras ventoinhas verificadas da mesma conta e região.",
         "data": {
           "username": "Email",
           "password": "Palavra-passe",

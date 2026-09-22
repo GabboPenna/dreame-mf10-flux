@@ -20,7 +20,7 @@ class FluxEntity(CoordinatorEntity[FluxCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.did)},
             manufacturer="Dreame",
-            name=NAME,
+            name=device.name or NAME,
             model="MF10",
             model_id=device.model,
             sw_version=device.firmware,

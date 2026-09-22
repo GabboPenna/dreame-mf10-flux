@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "Zaloguj się ponownie na konto powiązane z tym wentylatorem.",
+        "description": "Zaloguj się ponownie na konto powiązane z tym wentylatorem. Nowe dane logowania zostaną również użyte dla pozostałych zweryfikowanych wentylatorów na tym samym koncie i w tym samym regionie.",
         "data": {
           "username": "E-mail",
           "password": "Hasło",

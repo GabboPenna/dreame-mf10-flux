@@ -16,7 +16,7 @@
         }
       },
       "reauth_confirm": {
-        "description": "請使用與此風扇綁定的帳戶重新登入。",
+        "description": "請重新登入與此風扇關聯的帳號。更新後的登入資訊也將用於同一帳號和地區下其他已驗證的風扇。",
         "data": {
           "username": "電子郵件",
           "password": "密碼",

@@ -1,6 +1,23 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.0.2 — 2026-09-23
+
+- Fix a queued speed change leaving the fan off after an in-flight power-off command.
+- Compare reported state with the requested command and allow two bounded follow-up
+  reads for delayed cloud updates. Report unconfirmed commands without replaying writes.
+- Refresh actual state after uncertain or partially accepted commands; preserve
+  authentication recovery and cloud request cooldowns.
+- Use Dreamehome fan names, including later changes, while preserving Home Assistant
+  name overrides and existing entity IDs.
+- Reauthenticate verified fans on the same account and region together, without
+  duplicate reloads or enabling disabled entries.
+- Add last successful update time, consecutive update failures, command duration,
+  outcome and failure counters to identifier-free diagnostics.
+- Let an automatic preset take priority when a turn-on action also supplies a speed.
+- Add 16 Home Assistant regression tests; all 60 automated tests pass. Validate
+  commands on an EU MF10 running firmware 1.8.30_1047 and restore its configuration.
+
 ## 1.0.1 — 2026-09-22
 
 - Redraw MF10 FLUX lettering using the supplied Dreame wordmark's shapes and

@@ -67,6 +67,9 @@ class FluxFan(FluxEntity, FanEntity):
             properties = {Property.MODE: Mode.MANUAL.value, Property.SPEED: speed}
         if preset_mode is not None:
             properties[Property.MODE] = Mode[preset_mode.upper()].value
+            if properties[Property.MODE] != Mode.MANUAL:
+                # Automatic presets choose their own speed; an explicit preset takes priority.
+                properties.pop(Property.SPEED, None)
         await self.coordinator.execute(power=True, properties=properties)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -78,7 +81,7 @@ class FluxFan(FluxEntity, FanEntity):
             await self.async_turn_off()
         else:
             await self.coordinator.execute(
-                power=True if not self.is_on else None,
+                ensure_on=True,
                 properties={Property.MODE: Mode.MANUAL.value, Property.SPEED: speed},
             )
 

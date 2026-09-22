@@ -3,7 +3,13 @@
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import (
+    SOURCE_REAUTH,
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import callback
 from homeassistant.helpers import selector
@@ -128,10 +134,43 @@ class FluxConfigFlow(ConfigFlow, domain=DOMAIN):
             elif not any(d.did == entry.data[CONF_DEVICE_ID] for d in self._devices):
                 errors["base"] = "wrong_account"
             else:
-                return self.async_update_reload_and_abort(entry, data_updates=self._credentials)
+                self._update_account_entries(entry)
+                return self.async_abort(reason="reauth_successful")
         return self.async_show_form(
             step_id="reauth_confirm", data_schema=account_schema(dict(entry.data)), errors=errors
         )
+
+    @callback
+    def _update_account_entries(self, entry: ConfigEntry) -> None:
+        """Recover verified fans on the same account without touching other accounts."""
+        identity = (entry.data[CONF_USERNAME].strip().casefold(), entry.data[CONF_REGION])
+        new_identity = (self._credentials[CONF_USERNAME].casefold(), self._credentials[CONF_REGION])
+        verified = {device.did for device in self._devices}
+        entries = [entry]
+        if identity == new_identity:
+            entries.extend(
+                other
+                for other in self._async_current_entries()
+                if other.entry_id != entry.entry_id
+                and (other.data[CONF_USERNAME].strip().casefold(), other.data[CONF_REGION])
+                == identity
+                and other.data[CONF_DEVICE_ID] in verified
+            )
+        for other in entries:
+            changed = self.hass.config_entries.async_update_entry(
+                other, data=dict(other.data) | self._credentials
+            )
+            # Loaded entries already reload through their update listener.
+            if not other.disabled_by and (not changed or not other.update_listeners):
+                self.hass.config_entries.async_schedule_reload(other.entry_id)
+        recovered = {other.entry_id for other in entries}
+        for flow in self.hass.config_entries.flow.async_progress_by_handler(DOMAIN):
+            if (
+                flow["flow_id"] != self.flow_id
+                and flow["context"].get("source") == SOURCE_REAUTH
+                and flow["context"].get("entry_id") in recovered
+            ):
+                self.hass.config_entries.flow.async_abort(flow["flow_id"])
 
     @staticmethod
     @callback
