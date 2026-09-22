@@ -1,6 +1,14 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.0.1 — 2026-09-22
+
+- Redraw MF10 FLUX lettering using the supplied Dreame wordmark's shapes and
+  stroke weight, replacing the system font in the logos and icon badge.
+- Regenerate light/dark and standard/high-resolution assets and the README image.
+- Make artwork generation independent of installed system fonts. This is custom
+  matching lettering, not an official Dreame font.
+
 ## 1.0.0 — 2026-09-22
 
 - Native asynchronous Home Assistant integration for the Dreame MF10.

@@ -35,7 +35,9 @@ Translations live in `custom_components/dreame_mf10_flux/translations`. Copy
 Language reviewers are welcome; file completeness does not imply native review.
 
 Brand compositions can be regenerated with `python tools/render_brand.py` after
-installing Pillow. Dreame's wordmark remains its owner's trademark; the project
-name and compositions identify this unofficial integration.
+installing Pillow. MF10 FLUX uses custom lettering derived from the supplied
+wordmark's geometry; no system font or official Dreame font file is required.
+Dreame's wordmark remains its owner's trademark; the project name and compositions
+identify this unofficial integration.
 
 Maintained by **Gabriele Pennacchia**.
