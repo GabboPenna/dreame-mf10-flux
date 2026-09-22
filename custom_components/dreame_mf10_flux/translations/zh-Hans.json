@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "请使用Dreamehome账户登录并选择账户地区。",
+        "data": {
+          "username": "电子邮箱",
+          "password": "密码",
+          "region": "账户地区"
+        }
+      },
+      "device": {
+        "description": "选择要添加的MF10。",
+        "data": {
+          "device_id": "风扇"
+        }
+      },
+      "reauth_confirm": {
+        "description": "请使用与此风扇绑定的账户重新登录。",
+        "data": {
+          "username": "电子邮箱",
+          "password": "密码",
+          "region": "账户地区"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "邮箱或密码错误。",
+      "cannot_connect": "无法连接Dreame云端，请稍后重试。",
+      "rate_limited": "已达到云端请求上限，请稍后重试。",
+      "wrong_account": "此账户中没有已配置的风扇。"
+    },
+    "abort": {
+      "no_devices": "此账户和地区没有找到尚未配置的MF10。",
+      "already_configured": "此风扇已配置。",
+      "reauth_successful": "身份验证已更新。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "云端更新间隔为10至300秒，默认为30秒。",
+        "data": {
+          "poll_interval": "更新间隔"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "请输入10至300之间的数值。"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "欧洲",
+        "us": "美国",
+        "cn": "中国",
+        "sg": "新加坡",
+        "ru": "俄罗斯",
+        "kr": "韩国",
+        "ca": "加拿大"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "智能",
+              "powerful": "强劲",
+              "night": "睡眠",
+              "manual": "手动",
+              "natural": "自然风"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "温度"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "童锁"
+      },
+      "rotation": {
+        "name": "底座旋转"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "扇叶摆动",
+        "state": {
+          "off": "关闭",
+          "left": "左侧",
+          "right": "右侧",
+          "both": "双侧",
+          "both_sync": "双侧同步",
+          "both_staggered": "双侧交替"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "云端连接"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "无法确认指令。重试前请检查风扇状态。"
+    },
+    "device_offline": {
+      "message": "云端显示风扇离线。"
+    },
+    "authentication_failed": {
+      "message": "请重新登录Dreamehome账户。"
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Zaloguj się na konto Dreamehome i wybierz jego region.",
+        "data": {
+          "username": "E-mail",
+          "password": "Hasło",
+          "region": "Region konta"
+        }
+      },
+      "device": {
+        "description": "Wybierz wentylator MF10 do dodania.",
+        "data": {
+          "device_id": "Wentylator"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Zaloguj się ponownie na konto powiązane z tym wentylatorem.",
+        "data": {
+          "username": "E-mail",
+          "password": "Hasło",
+          "region": "Region konta"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Nieprawidłowy adres e-mail lub hasło.",
+      "cannot_connect": "Nie można połączyć się z chmurą Dreame. Spróbuj później.",
+      "rate_limited": "Osiągnięto limit żądań do chmury. Poczekaj przed ponowną próbą.",
+      "wrong_account": "To konto nie zawiera skonfigurowanego wentylatora."
+    },
+    "abort": {
+      "no_devices": "Nie znaleziono nowych wentylatorów MF10 dla tego konta i regionu.",
+      "already_configured": "Ten wentylator jest już skonfigurowany.",
+      "reauth_successful": "Uwierzytelnianie zaktualizowane."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Czas między aktualizacjami z chmury: od 10 do 300 sekund. Domyślnie: 30 sekund.",
+        "data": {
+          "poll_interval": "Interwał aktualizacji"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "Wprowadź wartość od 10 do 300."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa",
+        "us": "Stany Zjednoczone",
+        "cn": "Chiny",
+        "sg": "Singapur",
+        "ru": "Rosja",
+        "kr": "Korea Południowa",
+        "ca": "Kanada"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "AI",
+              "powerful": "Mocny",
+              "night": "Nocny",
+              "manual": "Ręczny",
+              "natural": "Naturalny"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperatura"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "Blokada rodzicielska"
+      },
+      "rotation": {
+        "name": "Obrót podstawy"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Oscylacja łopatek",
+        "state": {
+          "off": "Wyłączona",
+          "left": "Lewa",
+          "right": "Prawa",
+          "both": "Obie",
+          "both_sync": "Obie synchronicznie",
+          "both_staggered": "Obie naprzemiennie"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Połączenie z chmurą"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "Nie udało się potwierdzić polecenia. Sprawdź stan wentylatora przed ponowną próbą."
+    },
+    "device_offline": {
+      "message": "Chmura zgłasza, że wentylator jest offline."
+    },
+    "authentication_failed": {
+      "message": "Zaloguj się ponownie na konto Dreamehome."
+    }
+  }
+}

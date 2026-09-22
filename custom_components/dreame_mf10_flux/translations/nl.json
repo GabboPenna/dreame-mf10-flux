@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Meld je aan met je Dreamehome-account en de bijbehorende regio.",
+        "data": {
+          "username": "E-mail",
+          "password": "Wachtwoord",
+          "region": "Accountregio"
+        }
+      },
+      "device": {
+        "description": "Selecteer de MF10 die je wilt toevoegen.",
+        "data": {
+          "device_id": "Ventilator"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Meld je opnieuw aan met het account dat aan deze ventilator is gekoppeld.",
+        "data": {
+          "username": "E-mail",
+          "password": "Wachtwoord",
+          "region": "Accountregio"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ongeldig e-mailadres of wachtwoord.",
+      "cannot_connect": "Geen verbinding met de Dreame-cloud. Probeer het later opnieuw.",
+      "rate_limited": "De aanvraaglimiet van de cloud is bereikt. Wacht voordat je het opnieuw probeert.",
+      "wrong_account": "Dit account bevat de ingestelde ventilator niet."
+    },
+    "abort": {
+      "no_devices": "Geen nieuwe MF10-ventilatoren gevonden voor dit account en deze regio.",
+      "already_configured": "Deze ventilator is al ingesteld.",
+      "reauth_successful": "Aanmelding bijgewerkt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Tijd tussen cloud-updates: 10 tot 300 seconden. Standaard: 30 seconden.",
+        "data": {
+          "poll_interval": "Update-interval"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "Voer een waarde van 10 tot 300 in."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa",
+        "us": "Verenigde Staten",
+        "cn": "China",
+        "sg": "Singapore",
+        "ru": "Rusland",
+        "kr": "Zuid-Korea",
+        "ca": "Canada"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "AI",
+              "powerful": "Krachtig",
+              "night": "Nacht",
+              "manual": "Handmatig",
+              "natural": "Natuurlijk"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperatuur"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "Kinderslot"
+      },
+      "rotation": {
+        "name": "Draaiing van de voet"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Oscillatie van de bladen",
+        "state": {
+          "off": "Uit",
+          "left": "Links",
+          "right": "Rechts",
+          "both": "Beide",
+          "both_sync": "Beide synchroon",
+          "both_staggered": "Beide afwisselend"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Cloudverbinding"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "De opdracht kon niet worden bevestigd. Controleer de ventilator voordat je het opnieuw probeert."
+    },
+    "device_offline": {
+      "message": "De cloud meldt dat de ventilator offline is."
+    },
+    "authentication_failed": {
+      "message": "Meld je opnieuw aan bij je Dreamehome-account."
+    }
+  }
+}

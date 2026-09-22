@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Sign in with your Dreamehome account and its region.",
+        "data": {
+          "username": "Email",
+          "password": "Password",
+          "region": "Account region"
+        }
+      },
+      "device": {
+        "description": "Select the MF10 to add.",
+        "data": {
+          "device_id": "Fan"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Sign in again with the account linked to this fan.",
+        "data": {
+          "username": "Email",
+          "password": "Password",
+          "region": "Account region"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Cannot connect to the Dreame cloud. Try again later.",
+      "rate_limited": "The cloud request limit was reached. Wait before trying again.",
+      "wrong_account": "This account does not contain the configured fan."
+    },
+    "abort": {
+      "no_devices": "No unconfigured MF10 fans were found in this account and region.",
+      "already_configured": "This fan is already configured.",
+      "reauth_successful": "Authentication updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Time between cloud updates, from 10 to 300 seconds. Default: 30 seconds.",
+        "data": {
+          "poll_interval": "Polling interval"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "Enter a value from 10 to 300."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europe",
+        "us": "United States",
+        "cn": "China",
+        "sg": "Singapore",
+        "ru": "Russia",
+        "kr": "South Korea",
+        "ca": "Canada"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "AI",
+              "powerful": "Powerful",
+              "night": "Sleep",
+              "manual": "Manual",
+              "natural": "Natural"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperature"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "Child lock"
+      },
+      "rotation": {
+        "name": "Base rotation"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Blade oscillation",
+        "state": {
+          "off": "Off",
+          "left": "Left",
+          "right": "Right",
+          "both": "Both",
+          "both_sync": "Both synchronized",
+          "both_staggered": "Both staggered"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Cloud connectivity"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "The command could not be confirmed. Check the fan state before trying again."
+    },
+    "device_offline": {
+      "message": "The cloud reports that the fan is offline."
+    },
+    "authentication_failed": {
+      "message": "Sign in again to reconnect your Dreamehome account."
+    }
+  }
+}

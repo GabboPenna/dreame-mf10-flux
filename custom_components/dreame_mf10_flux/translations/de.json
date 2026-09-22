@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Melde dich mit deinem Dreamehome-Konto und dessen Region an.",
+        "data": {
+          "username": "E-Mail",
+          "password": "Passwort",
+          "region": "Kontoregion"
+        }
+      },
+      "device": {
+        "description": "Wähle den MF10 aus, den du hinzufügen möchtest.",
+        "data": {
+          "device_id": "Ventilator"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Melde dich erneut mit dem mit diesem Ventilator verknüpften Konto an.",
+        "data": {
+          "username": "E-Mail",
+          "password": "Passwort",
+          "region": "Kontoregion"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "E-Mail oder Passwort ungültig.",
+      "cannot_connect": "Keine Verbindung zur Dreame-Cloud. Versuche es später erneut.",
+      "rate_limited": "Das Anfragelimit der Cloud wurde erreicht. Warte vor einem neuen Versuch.",
+      "wrong_account": "Dieses Konto enthält den eingerichteten Ventilator nicht."
+    },
+    "abort": {
+      "no_devices": "Keine neuen MF10-Ventilatoren für dieses Konto und diese Region gefunden.",
+      "already_configured": "Dieser Ventilator ist bereits eingerichtet.",
+      "reauth_successful": "Anmeldung aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Zeit zwischen Cloud-Abfragen: 10 bis 300 Sekunden. Standard: 30 Sekunden.",
+        "data": {
+          "poll_interval": "Abfrageintervall"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "Gib einen Wert von 10 bis 300 ein."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa",
+        "us": "Vereinigte Staaten",
+        "cn": "China",
+        "sg": "Singapur",
+        "ru": "Russland",
+        "kr": "Südkorea",
+        "ca": "Kanada"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "KI",
+              "powerful": "Stark",
+              "night": "Schlaf",
+              "manual": "Manuell",
+              "natural": "Natürlich"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperatur"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "Kindersicherung"
+      },
+      "rotation": {
+        "name": "Drehung des Sockels"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Schwenkbewegung",
+        "state": {
+          "off": "Aus",
+          "left": "Links",
+          "right": "Rechts",
+          "both": "Beide",
+          "both_sync": "Beide synchron",
+          "both_staggered": "Beide versetzt"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Cloud-Verbindung"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "Der Befehl konnte nicht bestätigt werden. Prüfe den Gerätestatus vor einem neuen Versuch."
+    },
+    "device_offline": {
+      "message": "Die Cloud meldet den Ventilator als offline."
+    },
+    "authentication_failed": {
+      "message": "Melde dich erneut bei deinem Dreamehome-Konto an."
+    }
+  }
+}

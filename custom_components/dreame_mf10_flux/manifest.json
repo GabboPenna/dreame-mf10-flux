@@ -1,0 +1,12 @@
+{
+  "domain": "dreame_mf10_flux",
+  "name": "Dreame MF10 Flux",
+  "codeowners": ["@GabboPenna"],
+  "config_flow": true,
+  "documentation": "https://github.com/GabboPenna/dreame-mf10-flux",
+  "integration_type": "device",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/GabboPenna/dreame-mf10-flux/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

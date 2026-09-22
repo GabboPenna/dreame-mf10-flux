@@ -1,0 +1,32 @@
+# Copyright 2026 Gabriele Pennacchia
+name: Bug report
+description: Report a reproducible problem with Dreame MF10 Flux.
+body:
+  - type: markdown
+    attributes:
+      value: Do not include passwords, tokens, device identifiers or Home Assistant backups.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Home Assistant version, Flux version and fan firmware.
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: Account region
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the expected behavior and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Attach Flux diagnostics after reviewing them for personal information.

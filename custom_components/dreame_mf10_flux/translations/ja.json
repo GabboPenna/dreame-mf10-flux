@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Dreamehomeアカウントとその地域を指定してログインしてください。",
+        "data": {
+          "username": "メールアドレス",
+          "password": "パスワード",
+          "region": "アカウントの地域"
+        }
+      },
+      "device": {
+        "description": "追加するMF10を選択してください。",
+        "data": {
+          "device_id": "扇風機"
+        }
+      },
+      "reauth_confirm": {
+        "description": "この扇風機に紐付けられたアカウントで再ログインしてください。",
+        "data": {
+          "username": "メールアドレス",
+          "password": "パスワード",
+          "region": "アカウントの地域"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "メールアドレスまたはパスワードが正しくありません。",
+      "cannot_connect": "Dreameクラウドに接続できません。後でもう一度お試しください。",
+      "rate_limited": "クラウドのリクエスト上限に達しました。しばらくお待ちください。",
+      "wrong_account": "このアカウントに設定済みの扇風機がありません。"
+    },
+    "abort": {
+      "no_devices": "このアカウントと地域に未設定のMF10が見つかりませんでした。",
+      "already_configured": "この扇風機は設定済みです。",
+      "reauth_successful": "認証を更新しました。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "クラウドの更新間隔は10～300秒です。既定値は30秒です。",
+        "data": {
+          "poll_interval": "更新間隔"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "10～300の値を入力してください。"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "ヨーロッパ",
+        "us": "アメリカ合衆国",
+        "cn": "中国",
+        "sg": "シンガポール",
+        "ru": "ロシア",
+        "kr": "韓国",
+        "ca": "カナダ"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "AI",
+              "powerful": "パワフル",
+              "night": "おやすみ",
+              "manual": "手動",
+              "natural": "自然風"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "温度"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "チャイルドロック"
+      },
+      "rotation": {
+        "name": "台座の回転"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "ブレードの首振り",
+        "state": {
+          "off": "オフ",
+          "left": "左",
+          "right": "右",
+          "both": "両方",
+          "both_sync": "両方を同期",
+          "both_staggered": "両方を交互に"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "クラウド接続"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "操作を確認できませんでした。再試行する前に扇風機の状態を確認してください。"
+    },
+    "device_offline": {
+      "message": "クラウドでは扇風機がオフラインになっています。"
+    },
+    "authentication_failed": {
+      "message": "Dreamehomeアカウントに再ログインしてください。"
+    }
+  }
+}

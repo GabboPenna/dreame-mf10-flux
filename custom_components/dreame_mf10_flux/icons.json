@@ -1,0 +1,11 @@
+{
+  "entity": {
+    "switch": {
+      "child_lock": { "default": "mdi:lock" },
+      "rotation": { "default": "mdi:rotate-3d-variant" }
+    },
+    "select": {
+      "oscillation": { "default": "mdi:swap-horizontal" }
+    }
+  }
+}

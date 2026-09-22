@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Inicie sessão com a sua conta Dreamehome e a respetiva região.",
+        "data": {
+          "username": "Email",
+          "password": "Palavra-passe",
+          "region": "Região da conta"
+        }
+      },
+      "device": {
+        "description": "Selecione o MF10 a adicionar.",
+        "data": {
+          "device_id": "Ventoinha"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Inicie sessão novamente com a conta associada a esta ventoinha.",
+        "data": {
+          "username": "Email",
+          "password": "Palavra-passe",
+          "region": "Região da conta"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Email ou palavra-passe incorretos.",
+      "cannot_connect": "Não foi possível ligar à nuvem Dreame. Tente mais tarde.",
+      "rate_limited": "O limite de pedidos à nuvem foi atingido. Aguarde antes de tentar novamente.",
+      "wrong_account": "Esta conta não contém a ventoinha configurada."
+    },
+    "abort": {
+      "no_devices": "Não foram encontradas novas ventoinhas MF10 para esta conta e região.",
+      "already_configured": "Esta ventoinha já está configurada.",
+      "reauth_successful": "Autenticação atualizada."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Intervalo entre atualizações da nuvem: 10 a 300 segundos. Predefinição: 30 segundos.",
+        "data": {
+          "poll_interval": "Intervalo de atualização"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "Introduza um valor de 10 a 300."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa",
+        "us": "Estados Unidos",
+        "cn": "China",
+        "sg": "Singapura",
+        "ru": "Rússia",
+        "kr": "Coreia do Sul",
+        "ca": "Canadá"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "IA",
+              "powerful": "Potente",
+              "night": "Noite",
+              "manual": "Manual",
+              "natural": "Natural"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "Temperatura"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "Bloqueio infantil"
+      },
+      "rotation": {
+        "name": "Rotação da base"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Oscilação das pás",
+        "state": {
+          "off": "Desligada",
+          "left": "Esquerda",
+          "right": "Direita",
+          "both": "Ambas",
+          "both_sync": "Ambas sincronizadas",
+          "both_staggered": "Ambas alternadas"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Ligação à nuvem"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "Não foi possível confirmar o comando. Verifique o estado da ventoinha antes de tentar novamente."
+    },
+    "device_offline": {
+      "message": "A nuvem indica que a ventoinha está offline."
+    },
+    "authentication_failed": {
+      "message": "Inicie sessão novamente na sua conta Dreamehome."
+    }
+  }
+}

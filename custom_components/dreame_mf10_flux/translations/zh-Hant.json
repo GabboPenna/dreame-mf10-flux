@@ -1,0 +1,124 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "請使用Dreamehome帳戶登入並選擇帳戶地區。",
+        "data": {
+          "username": "電子郵件",
+          "password": "密碼",
+          "region": "帳戶地區"
+        }
+      },
+      "device": {
+        "description": "選擇要新增的MF10。",
+        "data": {
+          "device_id": "風扇"
+        }
+      },
+      "reauth_confirm": {
+        "description": "請使用與此風扇綁定的帳戶重新登入。",
+        "data": {
+          "username": "電子郵件",
+          "password": "密碼",
+          "region": "帳戶地區"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "電子郵件或密碼錯誤。",
+      "cannot_connect": "無法連線至Dreame雲端，請稍後再試。",
+      "rate_limited": "已達到雲端請求上限，請稍後再試。",
+      "wrong_account": "此帳戶中沒有已設定的風扇。"
+    },
+    "abort": {
+      "no_devices": "此帳戶和地區沒有找到尚未設定的MF10。",
+      "already_configured": "此風扇已設定。",
+      "reauth_successful": "身分驗證已更新。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "雲端更新間隔為10至300秒，預設為30秒。",
+        "data": {
+          "poll_interval": "更新間隔"
+        }
+      }
+    },
+    "error": {
+      "invalid_interval": "請輸入10至300之間的數值。"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "歐洲",
+        "us": "美國",
+        "cn": "中國",
+        "sg": "新加坡",
+        "ru": "俄羅斯",
+        "kr": "韓國",
+        "ca": "加拿大"
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "ai": "智慧",
+              "powerful": "強勁",
+              "night": "睡眠",
+              "manual": "手動",
+              "natural": "自然風"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "temperature": {
+        "name": "溫度"
+      }
+    },
+    "switch": {
+      "child_lock": {
+        "name": "兒童鎖"
+      },
+      "rotation": {
+        "name": "底座旋轉"
+      }
+    },
+    "select": {
+      "oscillation": {
+        "name": "扇葉擺動",
+        "state": {
+          "off": "關閉",
+          "left": "左側",
+          "right": "右側",
+          "both": "雙側",
+          "both_sync": "雙側同步",
+          "both_staggered": "雙側交替"
+        }
+      }
+    },
+    "binary_sensor": {
+      "connectivity": {
+        "name": "雲端連線"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "無法確認指令。重試前請檢查風扇狀態。"
+    },
+    "device_offline": {
+      "message": "雲端顯示風扇離線。"
+    },
+    "authentication_failed": {
+      "message": "請重新登入Dreamehome帳戶。"
+    }
+  }
+}

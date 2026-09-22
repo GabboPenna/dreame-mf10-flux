@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dreame-mf10-flux"
+version = "1.0.0"
+description = "Asynchronous Dreame MF10 fan control for Home Assistant"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Gabriele Pennacchia"}]
+dependencies = ["aiohttp>=3.13,<4"]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.14"]
+
+[project.urls]
+Repository = "https://github.com/GabboPenna/dreame-mf10-flux"
+Issues = "https://github.com/GabboPenna/dreame-mf10-flux/issues"
+
+[tool.setuptools]
+packages = ["mf10_flux"]
+package-dir = {mf10_flux = "custom_components/dreame_mf10_flux/api"}
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
