@@ -104,7 +104,14 @@ for dark in (False, True):
     save_pair(icon, "dark_icon" if dark else "icon")
 
     logo = Image.new("RGBA", (1280, 360))
-    logo.alpha_composite(FAN.resize((344, 344), Image.Resampling.LANCZOS), (0, 8))
+    product = FAN.copy()
+    if dark:
+        # The small wordmark beneath the supplied fan also needs light ink.
+        label = product.crop((0, 460, product.width, product.height))
+        light_label = Image.new("RGBA", label.size, foreground)
+        light_label.putalpha(label.getchannel("A"))
+        product.paste(light_label, (0, 460))
+    logo.alpha_composite(product.resize((344, 344), Image.Resampling.LANCZOS), (0, 8))
     mark = WORDMARK.copy()
     if dark:
         mark = Image.new("RGBA", mark.size, foreground)
