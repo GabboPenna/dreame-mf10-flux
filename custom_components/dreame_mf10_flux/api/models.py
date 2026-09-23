@@ -43,6 +43,8 @@ class Property(Enum):
     STAGGERED = (2, 12)
     TEMPERATURE = (3, 2)
     CHILD_LOCK = (6, 10)
+    DISPLAY = (6, 12)
+    OFF_TIMER = (6, 8)
 
     def request(self, did: str, value: int | None = None) -> dict[str, Any]:
         """Build a read or write item."""
@@ -119,6 +121,8 @@ class FanState:
     child_lock: bool | None = None
     oscillation: Oscillation | None = None
     temperature: float | None = None
+    display: bool | None = None
+    off_timer: int | None = None
 
     @classmethod
     def parse(cls, rows: list[dict[str, Any]], online: bool | None) -> "FanState":
@@ -158,6 +162,7 @@ class FanState:
             temperature = None
         rotation = bounded_int(properties.get(Property.ROTATION), 0, 1)
         child_lock = bounded_int(properties.get(Property.CHILD_LOCK), 0, 1)
+        display = bounded_int(properties.get(Property.DISPLAY), 0, 1)
         return cls(
             online=online,
             power=power == 1,
@@ -167,4 +172,6 @@ class FanState:
             child_lock=bool(child_lock) if child_lock is not None else None,
             oscillation=oscillation,
             temperature=temperature,
+            display=bool(display) if display is not None else None,
+            off_timer=bounded_int(properties.get(Property.OFF_TIMER), 0, 24),
         )

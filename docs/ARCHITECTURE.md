@@ -7,10 +7,13 @@ There is no sidecar, subprocess or extra runtime to keep running.
 
 The `api` package has no Home Assistant dependency. It handles the cloud session,
 device bindings, validated MF10 commands and immutable snapshots. A coordinator
-serializes operations for each fan and shares the result with all six entities.
+serializes operations for each fan and shares the result with all ten entities.
 Multiple fans with the same credentials share authentication and device discovery.
 
-Every normal poll reads the nine known properties in one request. Device binding
+Every normal poll reads eleven properties in one request. Display and timer values
+are optional. If firmware rejects the complete batch, a successful nine-property
+core read enables a cached fallback until reload or a firmware change. Transport,
+authentication and rate-limit errors do not trigger this fallback. Device binding
 metadata refreshes at most once a minute. The device lock covers state-dependent
 decisions, writes and confirmation, so a queued speed change sees the outcome of
 an earlier power command. Commands check a fresh snapshot against the requested
@@ -43,7 +46,8 @@ total timeout and an 8-second connection timeout.
 
 Availability is based on successful cloud communication and the binding's online
 flag. A disconnected fan disables controls but keeps its connectivity sensor
-available and off. An unreachable cloud makes all entities unavailable. An absent
+available and off. An unreachable cloud makes live entities unavailable; persisted
+operating-hour totals remain readable. An absent
 online flag produces an unknown connectivity state.
 
 Device names and firmware follow cloud binding metadata. Registry updates preserve
@@ -55,5 +59,23 @@ on reload. Device/account names and identifiers remain excluded from diagnostics
 The MF10 power action always includes a boolean input. There is deliberately no
 generic RPC/action service: unknown actions are not part of the supported API.
 Property writes are limited to known writable identifiers and allowed values.
+
+Display is property 6/12 (0 or 1); the native auto-off timer is 6/8 (hours, zero
+cancels). Both were read, written and restored on firmware 1.8.30_1047. Timer
+settings of 1 and 8 hours were confirmed; Flux accepts 0–8 in whole-hour steps.
+No remaining-minutes field or blade-realignment command has been verified.
+Blade realignment therefore has no entity yet; it needs a captured app command
+and hardware validation before it can be exposed.
+
+Observed runtime uses monotonic elapsed time and UTC samples, splitting the daily
+total at local midnight. Failed reads, offline states, clock jumps and gaps longer
+than two polling intervals plus 30 seconds discard the open interval. A separate
+midnight callback resets the daily value during outages. A Home Assistant Store
+persists counters per entry; no time is inferred between shutdown and startup.
+Runtime listeners update sensors even when the immutable fan snapshot is unchanged.
+
+Blueprints remain separate from the integration lifecycle and send standard fan
+services. Tests import them through Home Assistant's blueprint and automation
+schemas and execute their actions against simulated entities and services.
 
 Maintained by **Gabriele Pennacchia**.

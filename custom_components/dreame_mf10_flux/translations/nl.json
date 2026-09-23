@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "Temperatuur"
+      },
+      "operating_hours": {
+        "name": "Bedrijfsuren"
+      },
+      "operating_hours_today": {
+        "name": "Bedrijfsuren vandaag"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "Draaiing van de voet"
+      },
+      "display": {
+        "name": "Display"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "Cloudverbinding"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "Uitschakeltimer"
       }
     }
   },

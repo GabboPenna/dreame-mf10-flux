@@ -28,6 +28,9 @@ WRITABLE = {
     Property.BLADES: {0, 1, 2, 3},
     Property.SYNC: {0, 1},
     Property.STAGGERED: {0, 1},
+    Property.DISPLAY: {0, 1},
+    # Conservative range verified on the MF10, in whole hours; zero cancels.
+    Property.OFF_TIMER: set(range(9)),
 }
 
 
@@ -54,6 +57,7 @@ class FluxClient:
         self._devices: tuple[Device, ...] = ()
         self._devices_until = 0.0
         self._sequence = itertools.count(1)
+        self._core_only: set[tuple[str, str]] = set()
         self.requests = 0
 
     def _headers(self, authenticated: bool) -> dict[str, str]:
@@ -238,19 +242,38 @@ class FluxClient:
         device = await self.device(did)
         if device.online is False:
             return device, FanState(online=False)
-        rows = await self._rpc(
-            device, "get_properties", [prop.request(did) for prop in Property], read=True
+        key = (did, device.firmware)
+        core = tuple(
+            prop for prop in Property if prop not in (Property.DISPLAY, Property.OFF_TIMER)
         )
-        if not isinstance(rows, list):
-            raise CloudError("The cloud returned an invalid property list")
-        return device, FanState.parse(rows, device.online)
+
+        async def read(properties: tuple[Property, ...]) -> FanState:
+            rows = await self._rpc(
+                device, "get_properties", [prop.request(did) for prop in properties], read=True
+            )
+            if not isinstance(rows, list):
+                raise CloudError("The cloud returned an invalid property list")
+            return FanState.parse(rows, device.online)
+
+        if key in self._core_only:
+            return device, await read(core)
+        try:
+            return device, await read(tuple(Property))
+        except (AuthenticationError, RateLimited, Unavailable):
+            raise
+        except CloudError:
+            # Older firmware may reject the entire batch for an unknown property.
+            # Keep the core controls usable; retry optional fields after a firmware change/reload.
+            state = await read(core)
+            self._core_only.add(key)
+            return device, state
 
     async def write(self, device: Device, properties: Mapping[Property, int]) -> None:
         """Only known writable properties; uncertain writes are never replayed."""
         if not properties:
             return
         if any(
-            isinstance(value, bool) or prop not in WRITABLE or value not in WRITABLE[prop]
+            type(value) is not int or prop not in WRITABLE or value not in WRITABLE[prop]
             for prop, value in properties.items()
         ):
             raise ValueError("Unsupported MF10 property value")

@@ -1,6 +1,24 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.1.0 — 2026-09-23
+
+- Add a display switch and native auto-off timer with whole-hour settings from
+  0 to 8. Zero cancels; setting the timer does not start the fan. Both controls
+  use firmware 1047 properties verified by read/write/restore checks.
+- Keep core controls usable when firmware rejects the optional property batch.
+  Missing optional values make only their own controls unavailable.
+- Add daily and total observed operating-hour sensors with persistent storage,
+  local-midnight reset, daylight-saving handling and no extrapolation through
+  cloud outages or Home Assistant downtime.
+- Include three optional automation blueprints: external-temperature speed,
+  absence shutoff and gradual night speed with cancellation on manual changes.
+- Extend all twelve UI translations and document automation setup and limitations.
+- Cover controls, fallback behavior, runtime persistence and blueprint execution
+  with 80 automated tests against the protocol and Home Assistant 2026.9.3.
+- Blade realignment remains unavailable until its app command is captured and
+  verified. No unverified action or replacement oscillation sequence is exposed.
+
 ## 1.0.2 — 2026-09-23
 
 - Fix a queued speed change leaving the fan off after an in-flight power-off command.

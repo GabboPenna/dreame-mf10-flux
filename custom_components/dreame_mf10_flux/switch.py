@@ -22,6 +22,7 @@ async def async_setup_entry(
         [
             FluxSwitch(coordinator, "child_lock", Property.CHILD_LOCK),
             FluxSwitch(coordinator, "rotation", Property.ROTATION),
+            FluxSwitch(coordinator, "display", Property.DISPLAY),
         ]
     )
 
@@ -33,6 +34,10 @@ class FluxSwitch(FluxEntity, SwitchEntity):
         super().__init__(coordinator, key)
         self._key = key
         self._property = prop
+
+    @property
+    def available(self) -> bool:
+        return super().available and self.is_on is not None
 
     @property
     def is_on(self) -> bool | None:

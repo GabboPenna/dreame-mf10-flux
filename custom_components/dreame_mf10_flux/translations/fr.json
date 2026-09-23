@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "Température"
+      },
+      "operating_hours": {
+        "name": "Heures de fonctionnement"
+      },
+      "operating_hours_today": {
+        "name": "Heures de fonctionnement aujourd’hui"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "Rotation de la base"
+      },
+      "display": {
+        "name": "Écran"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "Connexion au cloud"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "Minuterie d’arrêt"
       }
     }
   },

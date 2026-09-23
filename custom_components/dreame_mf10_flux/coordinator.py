@@ -24,6 +24,7 @@ from .api import (
     RateLimited,
 )
 from .const import CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL, DOMAIN, NAME
+from .usage import FluxUsage
 
 _LOGGER = logging.getLogger(__name__)
 _CONFIRMATION_DELAYS = (0, 0.5, 1.0)
@@ -32,6 +33,8 @@ _COMMAND_FIELDS = {
     Property.SPEED: "speed",
     Property.ROTATION: "rotation",
     Property.CHILD_LOCK: "child_lock",
+    Property.DISPLAY: "display",
+    Property.OFF_TIMER: "off_timer",
 }
 
 
@@ -63,12 +66,14 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
         self.commands = 0
         self.command_failures = 0
         self.consecutive_command_failures = 0
+        self.usage = FluxUsage(hass, entry.entry_id, self.update_interval.total_seconds() * 2 + 30)
 
     async def _read(self) -> FanState:
         started = monotonic()
         try:
             device, state = await self.client.snapshot(self.device.did)
         except CloudError:
+            self.usage.unavailable()
             self.consecutive_update_failures += 1
             raise
         finally:
@@ -84,7 +89,12 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
                     registered.id, name=device.name or NAME, sw_version=device.firmware
                 )
         self.device = device
+        self.usage.observe(state.power if state.online is not False else None)
         return state
+
+    async def async_shutdown(self) -> None:
+        await super().async_shutdown()
+        await self.usage.async_shutdown()
 
     async def _async_update_data(self) -> FanState:
         try:

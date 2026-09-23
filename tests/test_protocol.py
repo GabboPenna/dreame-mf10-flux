@@ -3,7 +3,7 @@
 import asyncio
 import unittest
 from time import monotonic
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import support  # noqa: F401
@@ -41,6 +41,8 @@ VALUES = {
     Property.STAGGERED: 1,
     Property.TEMPERATURE: 28,
     Property.CHILD_LOCK: 0,
+    Property.DISPLAY: 1,
+    Property.OFF_TIMER: 0,
 }
 
 
@@ -136,9 +138,46 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.calls), 3)
         rpc = self.calls[-1]
         self.assertIn("dreame-iot-com-10000", rpc[0])
-        self.assertEqual(len(rpc[1]["data"]["params"]), 9)
+        self.assertEqual(len(rpc[1]["data"]["params"]), 11)
         await self.client.snapshot("fixture-fan")
         self.assertEqual(len(self.calls), 4, "Tokens and binding metadata should be reused")
+
+    async def test_optional_controls_round_trip_without_power_actions(self):
+        self.emulate_firmware = True
+        device = await self.client.device("fixture-fan")
+        for hours in (0, 1, 8):
+            await self.client.write(device, {Property.DISPLAY: 0, Property.OFF_TIMER: hours})
+            _, state = await self.client.snapshot(device.did)
+            self.assertFalse(state.display)
+            self.assertEqual(state.off_timer, hours)
+        self.assertFalse(
+            any(data.get("data", {}).get("method") == "action" for _, data, _ in self.calls)
+        )
+
+    async def test_unsupported_optional_fields_do_not_break_core_state(self):
+        core_rows = [row for row in rows() if (row["siid"], row["piid"]) not in ((6, 8), (6, 12))]
+        self.client._rpc = AsyncMock(side_effect=[CloudError("Unsupported"), core_rows, core_rows])
+        _, state = await self.client.snapshot("fixture-fan")
+        self.assertTrue(state.power)
+        self.assertIsNone(state.display)
+        self.assertIsNone(state.off_timer)
+        await self.client.snapshot("fixture-fan")
+        self.assertEqual(
+            [len(call.args[2]) for call in self.client._rpc.call_args_list], [11, 9, 9]
+        )
+        self.device_rows[0]["ver"] = "1.8.30_1048"
+        self.client._devices_until = 0
+        self.client._rpc.side_effect = [rows()]
+        _, state = await self.client.snapshot("fixture-fan")
+        self.assertTrue(state.display)
+        self.assertEqual(len(self.client._rpc.call_args.args[2]), 11)
+
+    async def test_optional_probe_does_not_retry_auth_rate_limits_or_transport_errors(self):
+        for error in (AuthenticationError("Expired"), RateLimited(60), Unavailable("Timeout")):
+            self.client._rpc = AsyncMock(side_effect=error)
+            with self.assertRaises(type(error)):
+                await self.client.snapshot("fixture-fan")
+            self.client._rpc.assert_awaited_once()
 
     async def test_reserved_characters_are_form_encoded(self):
         await self.client.authenticate()
@@ -260,6 +299,10 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             {Property.MODE: 6},
             {Property.TEMPERATURE: 99},
             {Property.CHILD_LOCK: True},
+            {Property.DISPLAY: 2},
+            {Property.OFF_TIMER: 9},
+            {Property.OFF_TIMER: 1.5},
+            {Property.OFF_TIMER: True},
         ):
             with self.assertRaises(ValueError):
                 await self.client.write(device, properties)

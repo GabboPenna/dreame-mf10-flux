@@ -45,19 +45,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: FluxEntry) -> bool:
         )
     account = accounts[key]
     account.users += 1
+    coordinator = None
     try:
         device = await account.client.device(entry.data[CONF_DEVICE_ID])
         coordinator = FluxCoordinator(hass, entry, account.client, device)
+        await coordinator.usage.async_load()
         await coordinator.async_config_entry_first_refresh()
         entry.runtime_data = FluxRuntime(coordinator, key)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     except AuthenticationError as err:
+        if coordinator is not None:
+            await coordinator.async_shutdown()
         _release(hass, key)
         raise ConfigEntryAuthFailed from err
     except CloudError as err:
+        if coordinator is not None:
+            await coordinator.async_shutdown()
         _release(hass, key)
         raise ConfigEntryNotReady(str(err)) from err
     except BaseException:
+        if coordinator is not None:
+            await coordinator.async_shutdown()
         _release(hass, key)
         raise
     entry.async_on_unload(entry.add_update_listener(_entry_updated))
@@ -81,5 +89,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: FluxEntry) -> bool:
     """Remove listeners and release the account when its last fan is unloaded."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         return False
+    await entry.runtime_data.coordinator.async_shutdown()
     _release(hass, entry.runtime_data.account_key)
     return True

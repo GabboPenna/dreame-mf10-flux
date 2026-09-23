@@ -1,0 +1,66 @@
+# Copyright 2026 Gabriele Pennacchia
+blueprint:
+  name: Dreame MF10 Flux - Switch off after absence
+  description: >-
+    Switch off the fan after a presence or occupancy sensor stays off for the
+    selected time. A return or an unavailable sensor cancels the wait.
+    Starting the fan in an empty room also starts the countdown. A Home Assistant
+    restart starts a fresh countdown; time while Home Assistant is stopped is
+    not counted. Saving or reloading automations also starts a fresh countdown.
+  domain: automation
+  author: Gabriele Pennacchia
+  homeassistant:
+    min_version: 2026.9.0
+  input:
+    fan:
+      name: MF10 fan
+      selector:
+        entity:
+          filter:
+            - domain: fan
+              integration: dreame_mf10_flux
+    presence:
+      name: Presence sensor (on means occupied)
+      selector:
+        entity:
+          filter:
+            - domain: binary_sensor
+    absence_minutes:
+      name: Absence before switching off
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 120
+          step: 1
+          unit_of_measurement: min
+          mode: box
+variables:
+  fan_entity: !input fan
+  presence_entity: !input presence
+  delay_minutes: !input absence_minutes
+triggers:
+  - trigger: state
+    entity_id: !input presence
+    to: "off"
+  - trigger: state
+    entity_id: !input fan
+    to: "on"
+  - trigger: homeassistant
+    event: start
+  - trigger: event
+    event_type: automation_reloaded
+conditions:
+  - condition: template
+    value_template: "{{ is_state(presence_entity, 'off') and is_state(fan_entity, 'on') }}"
+actions:
+  - wait_template: "{{ not is_state(presence_entity, 'off') or not is_state(fan_entity, 'on') }}"
+    timeout:
+      minutes: "{{ delay_minutes }}"
+    continue_on_timeout: true
+  - condition: template
+    value_template: "{{ not wait.completed and is_state(presence_entity, 'off') and is_state(fan_entity, 'on') }}"
+  - action: fan.turn_off
+    target:
+      entity_id: !input fan
+mode: restart

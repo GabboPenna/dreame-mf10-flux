@@ -1,11 +1,33 @@
 {
   "entity": {
     "switch": {
-      "child_lock": { "default": "mdi:lock" },
-      "rotation": { "default": "mdi:rotate-3d-variant" }
+      "child_lock": {
+        "default": "mdi:lock"
+      },
+      "rotation": {
+        "default": "mdi:rotate-3d-variant"
+      },
+      "display": {
+        "default": "mdi:monitor"
+      }
     },
     "select": {
-      "oscillation": { "default": "mdi:swap-horizontal" }
+      "oscillation": {
+        "default": "mdi:swap-horizontal"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "default": "mdi:timer-outline"
+      }
+    },
+    "sensor": {
+      "operating_hours": {
+        "default": "mdi:timer-sand"
+      },
+      "operating_hours_today": {
+        "default": "mdi:timer-sand"
+      }
     }
   }
 }

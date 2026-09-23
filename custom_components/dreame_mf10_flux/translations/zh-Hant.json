@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "溫度"
+      },
+      "operating_hours": {
+        "name": "運轉時數"
+      },
+      "operating_hours_today": {
+        "name": "今日運轉時數"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "底座旋轉"
+      },
+      "display": {
+        "name": "顯示螢幕"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "雲端連線"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "關機定時器"
       }
     }
   },

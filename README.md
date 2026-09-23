@@ -12,7 +12,8 @@ Native Home Assistant controls for the **Dreame Bladeless Fan MF10**.
 Maintained by **Gabriele Pennacchia**.
 
 Flux connects to your Dreamehome account and presents the MF10 as a fan, with
-temperature, child lock, base rotation, blade oscillation and cloud connectivity.
+temperature, child lock, display, auto-off timer, base rotation, blade oscillation,
+observed operating hours and cloud connectivity.
 It uses asynchronous requests, one shared account session and batched state reads.
 
 ## Requirements
@@ -44,6 +45,9 @@ Home Assistant `custom_components` directory and restart Home Assistant.
 | Fan | Power, ten speed levels, AI / Powerful / Sleep / Manual / Natural presets |
 | Temperature | Ambient temperature, converted to your preferred unit by Home Assistant |
 | Child lock | Enable or disable the controls on the device |
+| Display | Switch the device display on or off |
+| Auto-off timer | Native timer in whole hours: 1–8 hours, or 0 to cancel |
+| Operating hours | Persistent total and daily observed runtime |
 | Base rotation | Enable or disable base rotation |
 | Blade oscillation | Off, left, right, both, synchronized, staggered |
 | Cloud connectivity | Online state reported by Dreame, separate from fan power |
@@ -56,6 +60,36 @@ takes priority and chooses its own speed.
 
 Fans use their names from Dreamehome, including later name changes. A name you
 set manually in Home Assistant takes priority. Existing entity IDs stay unchanged.
+
+The display and timer have been verified on firmware **1.8.30_1047**. A firmware
+that does not report these properties leaves their entities unavailable while
+the core controls remain usable. Setting the timer does not turn on the fan.
+The number entity shows the hour value returned by the device; Flux does not
+invent a precise remaining countdown. The verified setting range is 0–8 hours,
+not a claim about the maximum range supported by every firmware.
+
+Operating hours start when Flux first observes the fan. They estimate running
+time between successful polls, so switching between polls introduces an error
+of up to the polling interval. Cloud outages, offline periods and Home Assistant
+downtime are excluded. These are not the fan's lifetime hours or an energy meter.
+Totals survive reloads and restarts; the daily counter resets at midnight in your
+Home Assistant time zone. Historical totals remain readable during cloud outages.
+
+## Ready-to-import automations
+
+Three optional blueprints are included:
+
+- [Temperature-based speed](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FGabboPenna%2Fdreame-mf10-flux%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Ftemperature_speed.yaml)
+  adjusts a running fan using an external temperature sensor and an enable helper.
+- [Switch off after absence](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FGabboPenna%2Fdreame-mf10-flux%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fabsence_off.yaml)
+  waits for continuous absence before switching off.
+- [Gradual night speed](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FGabboPenna%2Fdreame-mf10-flux%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fnight_fade.yaml)
+  lowers Manual speed one level at a time and can switch off at the end.
+
+Import a blueprint, select your own entities, and create an automation. Installing
+Flux does not enable these behaviors automatically. See the
+[automation guide](https://github.com/GabboPenna/dreame-mf10-flux/blob/main/docs/AUTOMATIONS.md)
+for setup, cancellation and restart behavior. Use one speed automation at a time.
 
 ## Languages
 
@@ -83,7 +117,8 @@ actual state visible. Rapid commands are processed in order, including deciding
 whether a speed change needs to turn the fan back on.
 Synchronized and staggered blade movement use two ordered writes because the
 firmware resets those flags when blade movement changes.
-Unchanged snapshots do not trigger extra state updates. Token renewal is shared
+Unchanged device snapshots do not trigger extra state updates; running-hour
+sensors update as observed time accumulates. Token renewal is shared
 across simultaneous requests, HTTP connections are reused, and all network calls
 have time limits. Read operations may retry once; an uncertain write is never
 automatically repeated. After an uncertain or partially accepted write, Flux
@@ -103,7 +138,7 @@ Diagnostics contain only operational state, firmware, region and timing counters
 They include the last successful cloud update in UTC, consecutive update failures,
 command duration and outcome, and total/consecutive command failures. Command
 timings include writes and confirmation, excluding time waiting for an earlier
-command. Counters reset when the integration reloads; request counts cover the
+command. Diagnostic counters reset when the integration reloads; request counts cover the
 shared account, while command and update counters belong to each fan.
 They omit account names, passwords, tokens, device identifiers and MAC addresses.
 There is no analytics or telemetry service.

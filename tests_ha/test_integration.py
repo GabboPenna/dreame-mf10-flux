@@ -38,6 +38,7 @@ from custom_components.dreame_mf10_flux.const import DOMAIN
 from custom_components.dreame_mf10_flux.coordinator import FluxCoordinator
 from custom_components.dreame_mf10_flux.diagnostics import async_get_config_entry_diagnostics
 from custom_components.dreame_mf10_flux.fan import FluxFan
+from custom_components.dreame_mf10_flux.number import FluxOffTimer
 from custom_components.dreame_mf10_flux.select import FluxOscillation
 from custom_components.dreame_mf10_flux.switch import FluxSwitch
 
@@ -101,6 +102,8 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
             Property.SPEED: "speed",
             Property.ROTATION: "rotation",
             Property.CHILD_LOCK: "child_lock",
+            Property.DISPLAY: "display",
+            Property.OFF_TIMER: "off_timer",
         }
         values = {fields[prop]: value for prop, value in properties.items()}
         if "mode" in values:
@@ -163,6 +166,25 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
             switch = FluxSwitch(self.coordinator, key, prop)
             await switch.async_turn_off()
             self.client.write.assert_awaited_with(DEVICE, {prop: 0})
+
+    async def test_timer_and_display_confirm_values_without_starting_fan(self):
+        self.state = replace(STATE, power=False, off_timer=0, display=True)
+        self.coordinator.async_set_updated_data(self.state)
+        timer = FluxOffTimer(self.coordinator, "off_timer")
+        display = FluxSwitch(self.coordinator, "display", Property.DISPLAY)
+        self.assertTrue(timer.available)
+        for hours in (1.0, 8.0, 0.0):
+            await timer.async_set_native_value(hours)
+            self.assertEqual(timer.native_value, int(hours))
+        await display.async_turn_off()
+        self.assertFalse(display.is_on)
+        self.client.power.assert_not_called()
+        for invalid in (-1, 9, 0.5, True, float("nan"), float("inf")):
+            with self.assertRaises(ValueError):
+                await timer.async_set_native_value(invalid)
+        self.coordinator.async_set_updated_data(STATE)
+        self.assertFalse(timer.available)
+        self.assertFalse(display.available)
 
     async def test_command_failure_is_not_replayed(self):
         self.client.power.side_effect = Unavailable("Request timed out")

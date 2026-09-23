@@ -1,0 +1,97 @@
+# Copyright 2026 Gabriele Pennacchia
+blueprint:
+  name: Dreame MF10 Flux - Temperature-based speed
+  description: >-
+    Adjust an already running fan using an external temperature sensor.
+    Create an input_boolean helper to enable this automation. Temperatures below
+    the lower threshold use 20% speed; the upper threshold uses 100%.
+    Celsius and Fahrenheit sensors are supported. Changes smaller than one
+    physical speed level are ignored. This selects Manual mode and never starts
+    a stopped fan. Disable the helper before using another speed automation.
+  domain: automation
+  author: Gabriele Pennacchia
+  homeassistant:
+    min_version: 2026.9.0
+  input:
+    fan:
+      name: MF10 fan
+      selector:
+        entity:
+          filter:
+            - domain: fan
+              integration: dreame_mf10_flux
+    temperature:
+      name: External temperature sensor
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              device_class: temperature
+    enabled:
+      name: Enable automatic speed
+      selector:
+        entity:
+          filter:
+            - domain: input_boolean
+    lower:
+      name: Temperature for minimum speed
+      default: 24
+      selector:
+        number:
+          min: 5
+          max: 40
+          step: 0.5
+          unit_of_measurement: °C
+          mode: box
+    upper:
+      name: Temperature for maximum speed
+      default: 30
+      selector:
+        number:
+          min: 6
+          max: 45
+          step: 0.5
+          unit_of_measurement: °C
+          mode: box
+variables:
+  fan_entity: !input fan
+  temperature_entity: !input temperature
+  enabled_entity: !input enabled
+  lower_temperature: !input lower
+  upper_temperature: !input upper
+triggers:
+  - trigger: time_pattern
+    minutes: /1
+  - trigger: state
+    entity_id: !input enabled
+    to: "on"
+  - trigger: state
+    entity_id: !input fan
+    to: "on"
+conditions:
+  - condition: template
+    value_template: >-
+      {{ is_state(enabled_entity, 'on') and is_state(fan_entity, 'on')
+         and is_number(states(temperature_entity))
+         and state_attr(temperature_entity, 'unit_of_measurement') in ['°C', '°F']
+         and upper_temperature | float > lower_temperature | float }}
+actions:
+  - variables:
+      temperature_c: >-
+        {% set value = states(temperature_entity) | float %}
+        {{ (value - 32) * 5 / 9 if state_attr(temperature_entity, 'unit_of_measurement') == '°F' else value }}
+  - variables:
+      desired_percentage: >-
+        {% set ratio = (temperature_c | float - lower_temperature | float) / (upper_temperature | float - lower_temperature | float) %}
+        {{ ([20, [100, ((20 + 80 * ratio) / 10) | round(0) * 10] | min] | max) | int }}
+  - condition: template
+    value_template: >-
+      {{ (desired_percentage | int - state_attr(fan_entity, 'percentage') | int(0)) | abs >= 10
+         or state_attr(fan_entity, 'preset_mode') != 'manual' }}
+  - action: fan.set_percentage
+    target:
+      entity_id: !input fan
+    data:
+      percentage: "{{ desired_percentage }}"
+mode: single
+max_exceeded: silent

@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "温度"
+      },
+      "operating_hours": {
+        "name": "運転時間"
+      },
+      "operating_hours_today": {
+        "name": "今日の運転時間"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "台座の回転"
+      },
+      "display": {
+        "name": "ディスプレイ"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "クラウド接続"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "切タイマー"
       }
     }
   },

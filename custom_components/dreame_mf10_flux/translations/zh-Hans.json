@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "温度"
+      },
+      "operating_hours": {
+        "name": "运行时长"
+      },
+      "operating_hours_today": {
+        "name": "今日运行时长"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "底座旋转"
+      },
+      "display": {
+        "name": "显示屏"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "云端连接"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "关机定时器"
       }
     }
   },

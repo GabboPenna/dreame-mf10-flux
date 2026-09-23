@@ -1,0 +1,90 @@
+# Copyright 2026 Gabriele Pennacchia
+blueprint:
+  name: Dreame MF10 Flux - Gradual night speed
+  description: >-
+    At the selected time, lower an already running fan in Manual mode by one
+    physical level (10%) per interval, down to 10%. Optionally switch off after
+    one final interval at 10%. Stops if the fan is switched off, becomes
+    unavailable, changes preset, or reports a different speed. Disable other
+    speed automations before using this blueprint. Never starts a stopped fan.
+    A restart or automation reload cancels the current fade.
+  domain: automation
+  author: Gabriele Pennacchia
+  homeassistant:
+    min_version: 2026.9.0
+  input:
+    fan:
+      name: MF10 fan
+      selector:
+        entity:
+          filter:
+            - domain: fan
+              integration: dreame_mf10_flux
+    start_time:
+      name: Start time
+      default: "23:00:00"
+      selector:
+        time: {}
+    interval_minutes:
+      name: Minutes between each speed reduction
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+          step: 1
+          unit_of_measurement: min
+          mode: box
+    switch_off:
+      name: Switch off after the final interval at 10%
+      default: false
+      selector:
+        boolean: {}
+variables:
+  fan_entity: !input fan
+  interval: !input interval_minutes
+  finish_off: !input switch_off
+triggers:
+  - trigger: time
+    at: !input start_time
+conditions:
+  - condition: template
+    value_template: >-
+      {{ is_state(fan_entity, 'on') and state_attr(fan_entity, 'preset_mode') == 'manual'
+         and state_attr(fan_entity, 'percentage') | int(0) in range(10, 101, 10) }}
+actions:
+  - variables:
+      starting_percentage: "{{ state_attr(fan_entity, 'percentage') | int }}"
+  - repeat:
+      count: "{{ (starting_percentage | int - 10) // 10 }}"
+      sequence:
+        - variables:
+            expected_percentage: "{{ starting_percentage | int - (repeat.index - 1) * 10 }}"
+        - wait_template: >-
+            {{ not is_state(fan_entity, 'on') or state_attr(fan_entity, 'preset_mode') != 'manual'
+               or state_attr(fan_entity, 'percentage') | int(0) != expected_percentage | int }}
+          timeout:
+            minutes: "{{ interval }}"
+          continue_on_timeout: true
+        - condition: template
+          value_template: "{{ not wait.completed }}"
+        - action: fan.set_percentage
+          target:
+            entity_id: !input fan
+          data:
+            percentage: "{{ expected_percentage | int - 10 }}"
+  - condition: template
+    value_template: "{{ finish_off }}"
+  - wait_template: >-
+      {{ not is_state(fan_entity, 'on') or state_attr(fan_entity, 'preset_mode') != 'manual'
+         or state_attr(fan_entity, 'percentage') | int(0) != 10 }}
+    timeout:
+      minutes: "{{ interval }}"
+    continue_on_timeout: true
+  - condition: template
+    value_template: "{{ not wait.completed }}"
+  - action: fan.turn_off
+    target:
+      entity_id: !input fan
+mode: single
+max_exceeded: silent

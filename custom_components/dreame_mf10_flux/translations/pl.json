@@ -81,6 +81,12 @@
     "sensor": {
       "temperature": {
         "name": "Temperatura"
+      },
+      "operating_hours": {
+        "name": "Godziny pracy"
+      },
+      "operating_hours_today": {
+        "name": "Godziny pracy dzisiaj"
       }
     },
     "switch": {
@@ -89,6 +95,9 @@
       },
       "rotation": {
         "name": "Obrót podstawy"
+      },
+      "display": {
+        "name": "Wyświetlacz"
       }
     },
     "select": {
@@ -107,6 +116,11 @@
     "binary_sensor": {
       "connectivity": {
         "name": "Połączenie z chmurą"
+      }
+    },
+    "number": {
+      "off_timer": {
+        "name": "Timer wyłączenia"
       }
     }
   },

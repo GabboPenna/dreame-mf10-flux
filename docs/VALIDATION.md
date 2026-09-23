@@ -1,6 +1,34 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Release validation
 
+## Version 1.1.0
+
+Tested on 2026-09-23 with Home Assistant 2026.9.3 and the EU MF10 running firmware
+1.8.30_1047. All 29 protocol/localization tests and 51 Home Assistant tests pass.
+The new tests cover optional-property fallback, display/timer confirmation,
+invalid timer values, persistent runtime, local midnight, daylight-saving changes,
+clock jumps and missing observations. Blueprint tests validate all three imports
+and execute temperature conversion, absence waits, night fades and cancellation
+against simulated entities using Home Assistant's actual script engine.
+
+Live Home Assistant services confirmed display changes, timer settings of 1, 8
+and 0 hours, and repeated requests for the current display/timer value. A short
+run at speed level 1 added approximately 35.35 seconds to the usage sensors.
+The integration recorded zero command failures. All six existing entity IDs were
+preserved and four new entities became available. Blueprint files were installed
+without enabling automations or selecting household sensors automatically.
+
+The standalone restoration helper received a cloud error for a mixed-property
+write. A subsequent independent cloud refresh and individual Home Assistant
+controls confirmed that the original power-off state, AI mode, rotation, child
+lock, oscillation, display and cancelled timer were restored. AI controls its
+reported speed, so exact speed restoration is only meaningful in Manual mode.
+
+The timer's actual one-hour expiry was not timed, and the integration does not
+claim a remaining-minute countdown. Blade realignment is still unimplemented:
+its app command has not been identified or sent. Other firmware and regions
+remain unverified. Cloud-reported state does not independently measure motion.
+
 ## Version 1.0.2
 
 Tested on 2026-09-23 with Home Assistant 2026.9.3 and the same EU MF10 running
