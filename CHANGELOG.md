@@ -1,6 +1,17 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.1.1 — 2026-09-23
+
+- Add a read-only sensor for days until pre-filter cleaning, using Dreame's cloud
+  value in the regular batched update. Include names in all twelve UI locales.
+- Treat zero as a valid reading and missing, invalid or failed values as
+  unavailable, without creating a local countdown or resetting the counter.
+- Preserve display and timer controls when firmware rejects the new property,
+  before falling back to the core properties if necessary.
+- Add coverage for parsing, availability, entity setup, read-only behavior and
+  compatibility fallback; all 86 automated tests pass.
+
 ## 1.1.0 — 2026-09-23
 
 - Add a display switch and native auto-off timer with whole-hour settings from

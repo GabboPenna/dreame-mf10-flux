@@ -87,6 +87,9 @@
       },
       "operating_hours_today": {
         "name": "Bedrijfsuren vandaag"
+      },
+      "prefilter_days": {
+        "name": "Dagen tot reiniging van het voorfilter"
       }
     },
     "switch": {

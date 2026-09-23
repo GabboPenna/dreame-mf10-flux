@@ -7,13 +7,15 @@ There is no sidecar, subprocess or extra runtime to keep running.
 
 The `api` package has no Home Assistant dependency. It handles the cloud session,
 device bindings, validated MF10 commands and immutable snapshots. A coordinator
-serializes operations for each fan and shares the result with all ten entities.
+serializes operations for each fan and shares the result with all eleven entities.
 Multiple fans with the same credentials share authentication and device discovery.
 
-Every normal poll reads eleven properties in one request. Display and timer values
-are optional. If firmware rejects the complete batch, a successful nine-property
-core read enables a cached fallback until reload or a firmware change. Transport,
-authentication and rate-limit errors do not trigger this fallback. Device binding
+Every normal poll reads twelve properties in one request. Pre-filter, display and
+timer values are optional. If firmware rejects the complete batch, Flux first
+tries the previous eleven-property group, preserving display and timer support.
+If that also fails, it tries the nine core properties. A successful group is
+cached until reload or a firmware change. Transport, authentication and rate-limit
+errors stop fallback reads. Device binding
 metadata refreshes at most once a minute. The device lock covers state-dependent
 decisions, writes and confirmation, so a queued speed change sees the outcome of
 an earlier power command. Commands check a fresh snapshot against the requested
@@ -66,6 +68,12 @@ settings of 1 and 8 hours were confirmed; Flux accepts 0–8 in whole-hour steps
 No remaining-minutes field or blade-realignment command has been verified.
 Blade realignment therefore has no entity yet; it needs a captured app command
 and hardware validation before it can be exposed.
+
+Pre-filter cleaning days use property 4/8, verified against the app's remaining
+days on firmware 1.8.30_1047. The parser accepts whole days from 0 to 365 and rejects
+missing, failed, negative or malformed readings. The duration sensor uses days
+and the measurement state class; it is neither a cumulative total nor a locally
+decremented countdown. The property is absent from the write allowlist.
 
 Observed runtime uses monotonic elapsed time and UTC samples, splitting the daily
 total at local midnight. Failed reads, offline states, clock jumps and gaps longer

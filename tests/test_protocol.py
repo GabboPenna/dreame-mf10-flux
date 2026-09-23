@@ -43,6 +43,7 @@ VALUES = {
     Property.CHILD_LOCK: 0,
     Property.DISPLAY: 1,
     Property.OFF_TIMER: 0,
+    Property.PREFILTER_DAYS: 16,
 }
 
 
@@ -138,7 +139,8 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.calls), 3)
         rpc = self.calls[-1]
         self.assertIn("dreame-iot-com-10000", rpc[0])
-        self.assertEqual(len(rpc[1]["data"]["params"]), 11)
+        self.assertEqual(len(rpc[1]["data"]["params"]), 12)
+        self.assertEqual(state.prefilter_days, 16)
         await self.client.snapshot("fixture-fan")
         self.assertEqual(len(self.calls), 4, "Tokens and binding metadata should be reused")
 
@@ -155,22 +157,48 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_unsupported_optional_fields_do_not_break_core_state(self):
-        core_rows = [row for row in rows() if (row["siid"], row["piid"]) not in ((6, 8), (6, 12))]
-        self.client._rpc = AsyncMock(side_effect=[CloudError("Unsupported"), core_rows, core_rows])
+        core_rows = [
+            row for row in rows() if (row["siid"], row["piid"]) not in ((6, 8), (6, 12), (4, 8))
+        ]
+        self.client._rpc = AsyncMock(
+            side_effect=[CloudError("Unsupported"), CloudError("Unsupported"), core_rows, core_rows]
+        )
         _, state = await self.client.snapshot("fixture-fan")
         self.assertTrue(state.power)
         self.assertIsNone(state.display)
         self.assertIsNone(state.off_timer)
+        self.assertIsNone(state.prefilter_days)
         await self.client.snapshot("fixture-fan")
         self.assertEqual(
-            [len(call.args[2]) for call in self.client._rpc.call_args_list], [11, 9, 9]
+            [len(call.args[2]) for call in self.client._rpc.call_args_list], [12, 11, 9, 9]
         )
         self.device_rows[0]["ver"] = "1.8.30_1048"
         self.client._devices_until = 0
         self.client._rpc.side_effect = [rows()]
         _, state = await self.client.snapshot("fixture-fan")
         self.assertTrue(state.display)
-        self.assertEqual(len(self.client._rpc.call_args.args[2]), 11)
+        self.assertEqual(len(self.client._rpc.call_args.args[2]), 12)
+
+    async def test_unsupported_prefilter_keeps_display_and_timer_available(self):
+        supported_rows = [row for row in rows() if (row["siid"], row["piid"]) != (4, 8)]
+        self.client._rpc = AsyncMock(
+            side_effect=[CloudError("Unsupported"), supported_rows, supported_rows]
+        )
+        _, state = await self.client.snapshot("fixture-fan")
+        self.assertIsNone(state.prefilter_days)
+        self.assertTrue(state.display)
+        self.assertEqual(state.off_timer, 0)
+        await self.client.snapshot("fixture-fan")
+        self.assertEqual(
+            [len(call.args[2]) for call in self.client._rpc.call_args_list], [12, 11, 11]
+        )
+
+    async def test_prefilter_fallback_stops_on_auth_rate_and_transport_errors(self):
+        for error in (AuthenticationError("Expired"), RateLimited(60), Unavailable("Timeout")):
+            self.client._rpc = AsyncMock(side_effect=[CloudError("Unsupported"), error])
+            with self.assertRaises(type(error)):
+                await self.client.snapshot("fixture-fan")
+            self.assertEqual(self.client._rpc.await_count, 2)
 
     async def test_optional_probe_does_not_retry_auth_rate_limits_or_transport_errors(self):
         for error in (AuthenticationError("Expired"), RateLimited(60), Unavailable("Timeout")):
@@ -303,6 +331,7 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
             {Property.OFF_TIMER: 9},
             {Property.OFF_TIMER: 1.5},
             {Property.OFF_TIMER: True},
+            {Property.PREFILTER_DAYS: 30},
         ):
             with self.assertRaises(ValueError):
                 await self.client.write(device, properties)
@@ -312,6 +341,28 @@ class ProtocolTests(unittest.IsolatedAsyncioTestCase):
 
 
 class StateTests(unittest.TestCase):
+    def test_prefilter_days_match_identifiers_and_accept_zero(self):
+        source = [row for row in rows() if (row["siid"], row["piid"]) != (4, 8)]
+        source.append({"siid": 4, "piid": 7, "code": 0, "value": 52})
+        self.assertIsNone(FanState.parse(source, True).prefilter_days)
+        for days in (16, 0, 30):
+            with self.subTest(days=days):
+                state = FanState.parse(
+                    source + [{"siid": 4, "piid": 8, "code": 0, "value": days}], True
+                )
+                self.assertEqual(state.prefilter_days, days)
+
+    def test_missing_failed_or_invalid_prefilter_never_becomes_zero(self):
+        source = [row for row in rows() if (row["siid"], row["piid"]) != (4, 8)]
+        self.assertIsNone(FanState.parse(source, True).prefilter_days)
+        for value in (None, True, "16", -1, 366, 16.5, float("nan"), float("inf")):
+            state = FanState.parse(
+                source + [{"siid": 4, "piid": 8, "code": 0, "value": value}], True
+            )
+            self.assertIsNone(state.prefilter_days)
+        state = FanState.parse(source + [{"siid": 4, "piid": 8, "code": 80001, "value": 16}], True)
+        self.assertIsNone(state.prefilter_days)
+
     def test_property_order_and_unknown_rows_do_not_change_state(self):
         source = rows()
         source.reverse()

@@ -59,3 +59,12 @@ They measure observed runtime since setup and today, in hours. They preserve
 their totals across restarts, omit unobserved gaps, and are estimates rather than
 a device lifetime counter. The `tracking_started_at` attribute records when
 observation began; the daily sensor also includes its local `date`.
+
+## Pre-filter maintenance
+
+The **Days until pre-filter cleaning** sensor reports Dreame's remaining days.
+Use a numeric-state trigger below your preferred threshold, such as 3 days, to
+build a reminder. A reading of 0 means no days remain according to Dreame; missing
+or invalid data is unavailable. Like other numeric-state triggers, the automation
+fires when the value crosses the threshold, rather than on every update below it.
+Choose your own notification action. The sensor performs no reset or device write.

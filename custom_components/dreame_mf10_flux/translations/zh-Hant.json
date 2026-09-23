@@ -87,6 +87,9 @@
       },
       "operating_hours_today": {
         "name": "今日運轉時數"
+      },
+      "prefilter_days": {
+        "name": "距離清潔前置濾網的天數"
       }
     },
     "switch": {

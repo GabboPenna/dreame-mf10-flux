@@ -45,6 +45,7 @@ class Property(Enum):
     CHILD_LOCK = (6, 10)
     DISPLAY = (6, 12)
     OFF_TIMER = (6, 8)
+    PREFILTER_DAYS = (4, 8)
 
     def request(self, did: str, value: int | None = None) -> dict[str, Any]:
         """Build a read or write item."""
@@ -123,6 +124,7 @@ class FanState:
     temperature: float | None = None
     display: bool | None = None
     off_timer: int | None = None
+    prefilter_days: int | None = None
 
     @classmethod
     def parse(cls, rows: list[dict[str, Any]], online: bool | None) -> "FanState":
@@ -174,4 +176,5 @@ class FanState:
             temperature=temperature,
             display=bool(display) if display is not None else None,
             off_timer=bounded_int(properties.get(Property.OFF_TIMER), 0, 24),
+            prefilter_days=bounded_int(properties.get(Property.PREFILTER_DAYS), 0, 365),
         )

@@ -87,6 +87,9 @@
       },
       "operating_hours_today": {
         "name": "Heures de fonctionnement aujourd’hui"
+      },
+      "prefilter_days": {
+        "name": "Jours avant le nettoyage du préfiltre"
       }
     },
     "switch": {

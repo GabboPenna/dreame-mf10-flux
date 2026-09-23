@@ -20,6 +20,15 @@ PASSWORD_SUFFIX = "RAylYC%fmSKp7%Tq"
 USER_AGENT = "Dreame_Smarthome/2.1.9 (iPhone; iOS 18.4.1; Scale/3.00)"
 REGIONS = ("eu", "us", "cn", "sg", "ru", "kr", "ca")
 TIMEOUT = aiohttp.ClientTimeout(total=15, connect=8)
+_PROPERTY_GROUPS = (
+    tuple(Property),
+    tuple(prop for prop in Property if prop != Property.PREFILTER_DAYS),
+    tuple(
+        prop
+        for prop in Property
+        if prop not in (Property.DISPLAY, Property.OFF_TIMER, Property.PREFILTER_DAYS)
+    ),
+)
 WRITABLE = {
     Property.MODE: {0, 1, 2, 3, 7},
     Property.SPEED: set(range(1, 11)),
@@ -57,7 +66,7 @@ class FluxClient:
         self._devices: tuple[Device, ...] = ()
         self._devices_until = 0.0
         self._sequence = itertools.count(1)
-        self._core_only: set[tuple[str, str]] = set()
+        self._property_group: dict[tuple[str, str], int] = {}
         self.requests = 0
 
     def _headers(self, authenticated: bool) -> dict[str, str]:
@@ -243,30 +252,28 @@ class FluxClient:
         if device.online is False:
             return device, FanState(online=False)
         key = (did, device.firmware)
-        core = tuple(
-            prop for prop in Property if prop not in (Property.DISPLAY, Property.OFF_TIMER)
-        )
-
-        async def read(properties: tuple[Property, ...]) -> FanState:
-            rows = await self._rpc(
-                device, "get_properties", [prop.request(did) for prop in properties], read=True
-            )
-            if not isinstance(rows, list):
-                raise CloudError("The cloud returned an invalid property list")
-            return FanState.parse(rows, device.online)
-
-        if key in self._core_only:
-            return device, await read(core)
-        try:
-            return device, await read(tuple(Property))
-        except (AuthenticationError, RateLimited, Unavailable):
-            raise
-        except CloudError:
-            # Older firmware may reject the entire batch for an unknown property.
-            # Keep the core controls usable; retry optional fields after a firmware change/reload.
-            state = await read(core)
-            self._core_only.add(key)
-            return device, state
+        for group in range(self._property_group.get(key, 0), len(_PROPERTY_GROUPS)):
+            try:
+                rows = await self._rpc(
+                    device,
+                    "get_properties",
+                    [prop.request(did) for prop in _PROPERTY_GROUPS[group]],
+                    read=True,
+                )
+                if not isinstance(rows, list):
+                    raise CloudError("The cloud returned an invalid property list")
+                state = FanState.parse(rows, device.online)
+            except (AuthenticationError, RateLimited, Unavailable):
+                raise
+            except CloudError:
+                if group == len(_PROPERTY_GROUPS) - 1:
+                    raise
+                # Preserve timer/display before falling back to the nine core properties.
+                # Retry optional fields after a firmware change or integration reload.
+            else:
+                self._property_group[key] = group
+                return device, state
+        raise CloudError("The cloud did not return a supported property group")
 
     async def write(self, device: Device, properties: Mapping[Property, int]) -> None:
         """Only known writable properties; uncertain writes are never replayed."""

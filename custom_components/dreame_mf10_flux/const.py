@@ -4,7 +4,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "dreame_mf10_flux"
 NAME = "Dreame MF10 Flux"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 PLATFORMS = (
     Platform.FAN,
     Platform.SENSOR,

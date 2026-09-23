@@ -87,6 +87,9 @@
       },
       "operating_hours_today": {
         "name": "Operating hours today"
+      },
+      "prefilter_days": {
+        "name": "Days until pre-filter cleaning"
       }
     },
     "switch": {

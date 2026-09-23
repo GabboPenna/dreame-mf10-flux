@@ -1,6 +1,23 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Release validation
 
+## Version 1.1.1
+
+Tested on 2026-09-23 with Home Assistant 2026.9.3 and the EU MF10 running firmware
+1.8.30_1047. All 33 protocol/localization tests and 53 Home Assistant tests pass.
+New cases cover pre-filter parsing, valid zero readings, missing and malformed
+values, write rejection, sensor availability and registration. Compatibility
+tests confirm that rejecting the pre-filter property preserves the previous
+display/timer group, and that authentication, transport and rate-limit errors
+stop further fallback requests.
+
+A live twelve-property snapshot returned 16 days for pre-filter cleaning,
+matching the app screenshot, in the same request as the existing fan data.
+After installation and restart, the translated duration sensor reported 16 days
+and all eleven entities were available. Validation performed reads only: no
+fan controls or maintenance resets were sent. The reported remaining days are
+Dreame's estimate; no countdown, filter percentage or cleaning reset is inferred.
+
 ## Version 1.1.0
 
 Tested on 2026-09-23 with Home Assistant 2026.9.3 and the EU MF10 running firmware

@@ -8,12 +8,14 @@ from dataclasses import replace
 from types import MappingProxyType
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import (
     ConfigEntries,
     ConfigEntry,
     ConfigEntryDisabler,
     ConfigEntryState,
 )
+from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers import device_registry as dr
@@ -40,6 +42,8 @@ from custom_components.dreame_mf10_flux.diagnostics import async_get_config_entr
 from custom_components.dreame_mf10_flux.fan import FluxFan
 from custom_components.dreame_mf10_flux.number import FluxOffTimer
 from custom_components.dreame_mf10_flux.select import FluxOscillation
+from custom_components.dreame_mf10_flux.sensor import FluxPrefilterDays
+from custom_components.dreame_mf10_flux.sensor import async_setup_entry as async_setup_sensors
 from custom_components.dreame_mf10_flux.switch import FluxSwitch
 
 CREDS = {"username": "fixture@example.test", "password": "private-fixture", "region": "eu"}
@@ -120,6 +124,35 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
         await self.coordinator.async_shutdown()
         await self.hass.async_stop(force=True)
         self.directory.cleanup()
+
+    async def test_prefilter_reports_days_and_unavailable_states_without_any_commands(self):
+        sensor = FluxPrefilterDays(self.coordinator, "prefilter_days")
+        self.assertEqual(sensor.native_unit_of_measurement, UnitOfTime.DAYS)
+        self.assertEqual(sensor.device_class, SensorDeviceClass.DURATION)
+        self.assertEqual(sensor.state_class, SensorStateClass.MEASUREMENT)
+        for days in (16, 0):
+            self.coordinator.async_set_updated_data(replace(STATE, prefilter_days=days))
+            self.assertTrue(sensor.available)
+            self.assertEqual(sensor.native_value, days)
+        self.coordinator.async_set_updated_data(STATE)
+        self.assertFalse(sensor.available)
+        self.assertIsNone(sensor.native_value)
+        self.coordinator.async_set_updated_data(replace(STATE, online=False, prefilter_days=16))
+        self.assertFalse(sensor.available)
+        self.coordinator.async_set_updated_data(replace(STATE, prefilter_days=16))
+        self.coordinator.async_set_update_error(UpdateFailed("Cloud unavailable"))
+        self.assertFalse(sensor.available)
+        self.client.write.assert_not_called()
+        self.client.power.assert_not_called()
+
+    async def test_sensor_platform_creates_prefilter_with_a_stable_identity(self):
+        add_entities = MagicMock()
+        await async_setup_sensors(self.hass, self.entry, add_entities)
+        entities = add_entities.call_args.args[0]
+        sensors = [entity for entity in entities if isinstance(entity, FluxPrefilterDays)]
+        self.assertEqual(len(sensors), 1)
+        self.assertEqual(sensors[0].unique_id, f"{DEVICE.did}_prefilter_days")
+        self.assertEqual(sensors[0].translation_key, "prefilter_days")
 
     async def test_speed_batches_manual_and_speed_with_one_confirmation(self):
         await self.fan.async_set_percentage(47)

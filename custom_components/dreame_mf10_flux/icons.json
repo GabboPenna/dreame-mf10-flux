@@ -27,6 +27,9 @@
       },
       "operating_hours_today": {
         "default": "mdi:timer-sand"
+      },
+      "prefilter_days": {
+        "default": "mdi:air-filter"
       }
     }
   }

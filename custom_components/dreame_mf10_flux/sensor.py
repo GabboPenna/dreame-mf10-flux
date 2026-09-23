@@ -1,4 +1,4 @@
-"""Temperature and observed operating hours. Copyright 2026 Gabriele Pennacchia."""
+"""Fan telemetry and observed operating hours. Copyright 2026 Gabriele Pennacchia."""
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.const import UnitOfTemperature, UnitOfTime
@@ -19,6 +19,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             FluxTemperature(coordinator, "temperature"),
+            FluxPrefilterDays(coordinator, "prefilter_days"),
             FluxUsageSensor(coordinator, "operating_hours", daily=False),
             FluxUsageSensor(coordinator, "operating_hours_today", daily=True),
         ]
@@ -36,6 +37,24 @@ class FluxTemperature(FluxEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         return self.coordinator.data.temperature
+
+
+class FluxPrefilterDays(FluxEntity, SensorEntity):
+    """Days to pre-filter cleaning reported by Dreame, without a local countdown."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.DAYS
+    _attr_suggested_unit_of_measurement = UnitOfTime.DAYS
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    @property
+    def available(self) -> bool:
+        return super().available and self.coordinator.data.prefilter_days is not None
+
+    @property
+    def native_value(self) -> int | None:
+        return self.coordinator.data.prefilter_days
 
 
 class FluxUsageSensor(FluxEntity, SensorEntity):

@@ -87,6 +87,9 @@
       },
       "operating_hours_today": {
         "name": "今日の運転時間"
+      },
+      "prefilter_days": {
+        "name": "プレフィルター清掃までの日数"
       }
     },
     "switch": {

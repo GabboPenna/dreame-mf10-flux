@@ -14,6 +14,7 @@ Maintained by **Gabriele Pennacchia**.
 Flux connects to your Dreamehome account and presents the MF10 as a fan, with
 temperature, child lock, display, auto-off timer, base rotation, blade oscillation,
 observed operating hours and cloud connectivity.
+It also reports the days remaining until pre-filter cleaning.
 It uses asynchronous requests, one shared account session and batched state reads.
 
 ## Requirements
@@ -48,6 +49,7 @@ Home Assistant `custom_components` directory and restart Home Assistant.
 | Display | Switch the device display on or off |
 | Auto-off timer | Native timer in whole hours: 1–8 hours, or 0 to cancel |
 | Operating hours | Persistent total and daily observed runtime |
+| Days until pre-filter cleaning | Remaining days reported by Dreame, for maintenance reminders |
 | Base rotation | Enable or disable base rotation |
 | Blade oscillation | Off, left, right, both, synchronized, staggered |
 | Cloud connectivity | Online state reported by Dreame, separate from fan power |
@@ -74,6 +76,12 @@ of up to the polling interval. Cloud outages, offline periods and Home Assistant
 downtime are excluded. These are not the fan's lifetime hours or an energy meter.
 Totals survive reloads and restarts; the daily counter resets at midnight in your
 Home Assistant time zone. Historical totals remain readable during cloud outages.
+
+**Days until pre-filter cleaning** reads the same remaining-days value shown in
+Dreamehome. It updates with the other fan data and can be used in numeric-state
+automations, for example when fewer than three days remain. Zero is a valid
+reading; a missing or invalid value makes the sensor unavailable. The integration
+only reads this maintenance counter and does not reset it.
 
 ## Ready-to-import automations
 
