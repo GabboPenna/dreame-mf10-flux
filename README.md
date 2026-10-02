@@ -53,6 +53,7 @@ Home Assistant `custom_components` directory and restart Home Assistant.
 | Base rotation | Enable or disable base rotation |
 | Blade oscillation | Off, left, right, both, synchronized, staggered |
 | Cloud connectivity | Online state reported by Dreame, separate from fan power |
+| Out of season | Persistent per-fan suspension of polling and device commands |
 
 Setting a speed selects Manual mode. The fan's oscillation toggle selects both
 blades or stops them; use the blade-oscillation selector for the full set of modes.
@@ -82,6 +83,31 @@ Dreamehome. It updates with the other fan data and can be used in numeric-state
 automations, for example when fewer than three days remain. Zero is a valid
 reading; a missing or invalid value makes the sensor unavailable. The integration
 only reads this maintenance counter and does not reset it.
+
+## Seasonal storage
+
+When storing your fan, switch it off or unplug it, then enable **Out of season**
+under the device's configuration controls. This is a local integration setting,
+not a power switch: a fan known to be running cannot be suspended. If you just
+unplugged a running fan, wait for its offline status to be reported first.
+
+While suspended, Flux makes no cloud requests for that fan and rejects device
+commands, including manual refreshes and commands queued before suspension.
+Temperature, connectivity and device controls become unavailable. Saved operating
+hours and the seasonal switch remain accessible. The choice survives integration
+reloads and Home Assistant restarts, even with no internet connection. Other fans
+on the same account continue working normally.
+
+Reconnect power and disable **Out of season** to return. Flux checks connectivity
+without sending a power or settings command. If the device cannot be reached, it
+stays suspended and Home Assistant shows an error; retry after reconnecting it.
+Expired credentials use the normal reauthentication flow.
+
+Flux does not change your automations. Add an **Out of season is off** condition
+to fan automations and exclude intentionally stored fans from availability
+alerts. Disable automatic temperature control before storage and re-enable it
+explicitly when ready, so reconnecting the fan cannot restart it through an
+external automation. Stored telemetry is never substituted with fabricated values.
 
 ## Ready-to-import automations
 

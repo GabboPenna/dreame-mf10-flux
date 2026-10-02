@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Fuori stagione"
+      },
       "child_lock": {
         "name": "Blocco bambini"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "Il ventilatore è fuori stagione. Riattivalo prima di inviare comandi."
+    },
+    "fan_still_running": {
+      "message": "Spegni o scollega il ventilatore prima di metterlo fuori stagione. La sospensione non spegne il dispositivo."
+    },
+    "resume_failed": {
+      "message": "Ventilatore non raggiungibile. Ricollega l'alimentazione e riprova. Rimane fuori stagione."
+    },
     "command_failed": {
       "message": "Comando non confermato. Controlla lo stato del ventilatore prima di riprovare."
     },

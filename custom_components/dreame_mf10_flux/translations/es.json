@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Fuera de temporada"
+      },
       "child_lock": {
         "name": "Bloqueo infantil"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "El ventilador está fuera de temporada. Reactívalo antes de enviar órdenes."
+    },
+    "fan_still_running": {
+      "message": "Apaga o desenchufa el ventilador antes de ponerlo fuera de temporada. La suspensión no apaga el dispositivo."
+    },
+    "resume_failed": {
+      "message": "No se puede acceder al ventilador. Vuelve a enchufarlo e inténtalo de nuevo. Sigue fuera de temporada."
+    },
     "command_failed": {
       "message": "No se pudo confirmar el comando. Comprueba el estado del ventilador antes de reintentarlo."
     },

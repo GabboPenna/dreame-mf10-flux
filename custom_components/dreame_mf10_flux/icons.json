@@ -1,6 +1,9 @@
 {
   "entity": {
     "switch": {
+      "out_of_season": {
+        "default": "mdi:archive-outline"
+      },
       "child_lock": {
         "default": "mdi:lock"
       },

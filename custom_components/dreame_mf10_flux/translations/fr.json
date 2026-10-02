@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Hors saison"
+      },
       "child_lock": {
         "name": "Verrouillage enfant"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "Le ventilateur est hors saison. Réactivez-le avant d'envoyer des commandes."
+    },
+    "fan_still_running": {
+      "message": "Éteignez ou débranchez le ventilateur avant de le mettre hors saison. La suspension n'éteint pas l'appareil."
+    },
+    "resume_failed": {
+      "message": "Ventilateur inaccessible. Rebranchez-le et réessayez. Il reste hors saison."
+    },
     "command_failed": {
       "message": "La commande n’a pas pu être confirmée. Vérifiez l’état du ventilateur avant de réessayer."
     },

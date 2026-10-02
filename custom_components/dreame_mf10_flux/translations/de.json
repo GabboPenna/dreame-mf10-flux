@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Außer Saison"
+      },
       "child_lock": {
         "name": "Kindersicherung"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "Der Ventilator ist außer Saison. Aktiviere ihn vor dem Senden von Befehlen."
+    },
+    "fan_still_running": {
+      "message": "Schalte den Ventilator aus oder trenne ihn vom Strom, bevor du ihn pausierst. Die Pause schaltet das Gerät nicht aus."
+    },
+    "resume_failed": {
+      "message": "Ventilator nicht erreichbar. Schließe ihn wieder an und versuche es erneut. Er bleibt außer Saison."
+    },
     "command_failed": {
       "message": "Der Befehl konnte nicht bestätigt werden. Prüfe den Gerätestatus vor einem neuen Versuch."
     },

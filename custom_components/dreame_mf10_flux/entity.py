@@ -30,4 +30,8 @@ class FluxEntity(CoordinatorEntity[FluxCoordinator]):
 
     @property
     def available(self) -> bool:
-        return super().available and self.coordinator.data.online is not False
+        return (
+            not self.coordinator.paused
+            and super().available
+            and self.coordinator.data.online is not False
+        )

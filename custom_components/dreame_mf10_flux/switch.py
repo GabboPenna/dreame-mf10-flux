@@ -3,6 +3,7 @@
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -23,6 +24,7 @@ async def async_setup_entry(
             FluxSwitch(coordinator, "child_lock", Property.CHILD_LOCK),
             FluxSwitch(coordinator, "rotation", Property.ROTATION),
             FluxSwitch(coordinator, "display", Property.DISPLAY),
+            FluxSeasonSwitch(coordinator, "out_of_season"),
         ]
     )
 
@@ -48,3 +50,23 @@ class FluxSwitch(FluxEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self.coordinator.execute(properties={self._property: 0})
+
+
+class FluxSeasonSwitch(FluxEntity, SwitchEntity):
+    """Local suspension stays controllable while the fan is unplugged."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+
+    @property
+    def available(self) -> bool:
+        return True
+
+    @property
+    def is_on(self) -> bool:
+        return self.coordinator.paused
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_paused(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_paused(False)

@@ -16,6 +16,7 @@ async def async_get_config_entry_diagnostics(
     coordinator = entry.runtime_data.coordinator
     return {
         "integration_version": VERSION,
+        "out_of_season": coordinator.paused,
         "model": coordinator.device.model,
         "firmware": coordinator.device.firmware,
         "region": entry.data[CONF_REGION],

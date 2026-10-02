@@ -7,7 +7,7 @@ There is no sidecar, subprocess or extra runtime to keep running.
 
 The `api` package has no Home Assistant dependency. It handles the cloud session,
 device bindings, validated MF10 commands and immutable snapshots. A coordinator
-serializes operations for each fan and shares the result with all eleven entities.
+serializes operations for each fan and shares the result with its entities.
 Multiple fans with the same credentials share authentication and device discovery.
 
 Every normal poll reads twelve properties in one request. Pre-filter, display and
@@ -81,6 +81,16 @@ than two polling intervals plus 30 seconds discard the open interval. A separate
 midnight callback resets the daily value during outages. A Home Assistant Store
 persists counters per entry; no time is inferred between shutdown and startup.
 Runtime listeners update sensors even when the immutable fan snapshot is unchanged.
+
+Seasonal suspension uses a separate per-entry Store with the suspension flag and
+the device binding metadata needed to initialize entities without discovery or
+authentication. It never stores credentials or session tokens in that file.
+The coordinator lock serializes suspension, polling and commands. Disabling the
+poll interval and publishing an empty snapshot cancels scheduled refreshes; a
+guard also blocks manual refreshes. A generation counter rejects commands queued
+before a completed pause/resume. Only the seasonal switch and saved usage values
+remain available. Resume checks a fresh snapshot before persisting the active
+state, and never sends device writes. Other account users are not suspended.
 
 Blueprints remain separate from the integration lifecycle and send standard fan
 services. Tests import them through Home Assistant's blueprint and automation

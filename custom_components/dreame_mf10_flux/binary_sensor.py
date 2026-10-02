@@ -26,7 +26,7 @@ class FluxConnectivity(FluxEntity, BinarySensorEntity):
 
     @property
     def available(self) -> bool:
-        return CoordinatorEntity.available.fget(self)
+        return not self.coordinator.paused and CoordinatorEntity.available.fget(self)
 
     @property
     def is_on(self) -> bool | None:

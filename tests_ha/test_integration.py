@@ -41,10 +41,11 @@ from custom_components.dreame_mf10_flux.coordinator import FluxCoordinator
 from custom_components.dreame_mf10_flux.diagnostics import async_get_config_entry_diagnostics
 from custom_components.dreame_mf10_flux.fan import FluxFan
 from custom_components.dreame_mf10_flux.number import FluxOffTimer
+from custom_components.dreame_mf10_flux.season import FluxSeason
 from custom_components.dreame_mf10_flux.select import FluxOscillation
 from custom_components.dreame_mf10_flux.sensor import FluxPrefilterDays
 from custom_components.dreame_mf10_flux.sensor import async_setup_entry as async_setup_sensors
-from custom_components.dreame_mf10_flux.switch import FluxSwitch
+from custom_components.dreame_mf10_flux.switch import FluxSeasonSwitch, FluxSwitch
 
 CREDS = {"username": "fixture@example.test", "password": "private-fixture", "region": "eu"}
 DEVICE = Device(
@@ -99,6 +100,143 @@ class IntegrationTests(unittest.IsolatedAsyncioTestCase):
 
     async def snapshot(self, did):
         return DEVICE, self.state
+
+    async def test_seasonal_pause_stops_all_reads_and_writes(self):
+        self.coordinator.async_set_updated_data(replace(STATE, power=False))
+        control = FluxSeasonSwitch(self.coordinator, "out_of_season")
+        await control.async_turn_on()
+        self.assertTrue(control.available)
+        self.assertTrue(control.is_on)
+        self.assertFalse(self.fan.available)
+        self.assertFalse(FluxConnectivity(self.coordinator, "connectivity").available)
+        self.assertIsNone(self.coordinator.update_interval)
+        for _ in range(3):
+            await self.coordinator.async_refresh()
+            self.assertIsNone(self.coordinator.data.temperature)
+        for call in (self.fan.async_turn_on, self.fan.async_turn_off):
+            with self.assertRaises(HomeAssistantError) as error:
+                await call()
+            self.assertEqual(error.exception.translation_key, "out_of_season")
+        self.client.snapshot.assert_not_awaited()
+        self.client.power.assert_not_awaited()
+        self.client.write.assert_not_awaited()
+
+    async def test_seasonal_pause_refuses_known_running_fan(self):
+        with self.assertRaises(HomeAssistantError) as error:
+            await self.coordinator.async_set_paused(True)
+        self.assertEqual(error.exception.translation_key, "fan_still_running")
+        self.assertFalse(self.coordinator.paused)
+        self.client.power.assert_not_awaited()
+
+    async def test_seasonal_pause_allowed_when_offline_or_cloud_unavailable(self):
+        for state, failed in ((FanState(False), False), (STATE, True)):
+            self.coordinator.season.paused = False
+            self.coordinator.async_set_updated_data(state)
+            if failed:
+                self.coordinator.async_set_update_error(UpdateFailed("offline"))
+            await self.coordinator.async_set_paused(True)
+            self.assertTrue(self.coordinator.paused)
+        self.client.snapshot.assert_not_awaited()
+
+    async def test_seasonal_resume_reads_without_writing_or_powering_on(self):
+        self.state = replace(STATE, power=False)
+        self.coordinator.async_set_updated_data(self.state)
+        await self.coordinator.async_set_paused(True)
+        await self.coordinator.async_set_paused(False)
+        self.assertFalse(self.coordinator.paused)
+        self.assertEqual(self.coordinator.update_interval.total_seconds(), 30)
+        self.assertFalse(self.coordinator.data.power)
+        self.assertTrue(self.fan.available)
+        self.client.snapshot.assert_awaited_once()
+        self.client.power.assert_not_awaited()
+        self.client.write.assert_not_awaited()
+
+    async def test_failed_resume_stays_paused_and_can_be_retried(self):
+        self.coordinator.async_set_updated_data(FanState(False))
+        await self.coordinator.async_set_paused(True)
+        for failure in (Unavailable("offline"), RateLimited(60)):
+            self.client.snapshot.side_effect = failure
+            with self.assertRaises(HomeAssistantError):
+                await self.coordinator.async_set_paused(False)
+            self.assertTrue(self.coordinator.paused)
+            self.assertIsNone(self.coordinator.update_interval)
+            self.assertTrue(FluxSeasonSwitch(self.coordinator, "out_of_season").available)
+        self.client.snapshot.side_effect = self.snapshot
+        self.state = FanState(False)
+        with self.assertRaises(HomeAssistantError):
+            await self.coordinator.async_set_paused(False)
+        self.assertTrue(self.coordinator.paused)
+        self.state = replace(STATE, power=False)
+        await self.coordinator.async_set_paused(False)
+        self.assertFalse(self.coordinator.paused)
+
+    async def test_resume_authentication_failure_keeps_pause_during_reauth(self):
+        self.coordinator.async_set_updated_data(FanState(False))
+        await self.coordinator.async_set_paused(True)
+        self.client.snapshot.side_effect = AuthenticationError("expired")
+        with patch.object(self.entry, "async_start_reauth") as reauth:
+            with self.assertRaises(HomeAssistantError) as error:
+                await self.coordinator.async_set_paused(False)
+            self.assertEqual(error.exception.translation_key, "authentication_failed")
+            reauth.assert_called_once_with(self.hass)
+        self.assertTrue(self.coordinator.paused)
+        self.assertIsNone(self.coordinator.update_interval)
+
+    async def test_paused_setup_survives_restart_without_cloud(self):
+        self.entry._async_set_state(self.hass, ConfigEntryState.SETUP_IN_PROGRESS, None)
+        self.coordinator.async_set_updated_data(FanState(False))
+        await self.coordinator.async_set_paused(True)
+        with (
+            patch("custom_components.dreame_mf10_flux.FluxClient", return_value=self.client),
+            patch.object(self.hass.config_entries, "async_forward_entry_setups", AsyncMock()),
+            patch.object(
+                self.hass.config_entries, "async_unload_platforms", AsyncMock(return_value=True)
+            ),
+        ):
+            await async_setup_entry(self.hass, self.entry)
+            restored = self.entry.runtime_data.coordinator
+            self.assertTrue(restored.paused)
+            self.assertEqual(restored.device, DEVICE)
+            self.assertIsNone(restored.update_interval)
+            self.client.device.assert_not_awaited()
+            self.client.snapshot.assert_not_awaited()
+            await async_unload_entry(self.hass, self.entry)
+
+    async def test_seasonal_choice_is_per_fan_and_idempotent(self):
+        self.coordinator.async_set_updated_data(FanState(False))
+        await self.coordinator.async_set_paused(True)
+        with patch.object(self.coordinator.season.store, "async_save", AsyncMock()) as save:
+            await self.coordinator.async_set_paused(True)
+            save.assert_not_awaited()
+        other = FluxSeason(self.hass, "another-fan")
+        await other.async_load("another-device")
+        self.assertFalse(other.paused)
+        mismatched = FluxSeason(self.hass, self.entry.entry_id)
+        with self.assertRaises(ValueError):
+            await mismatched.async_load("another-device")
+
+    async def test_seasonal_storage_failure_does_not_claim_suspension(self):
+        self.coordinator.async_set_updated_data(FanState(False))
+        with patch.object(
+            self.coordinator.season.store, "async_save", AsyncMock(side_effect=OSError)
+        ):
+            with self.assertRaises(OSError):
+                await self.coordinator.async_set_paused(True)
+        self.assertFalse(self.coordinator.paused)
+        self.assertIsNotNone(self.coordinator.update_interval)
+
+    async def test_queued_command_is_rejected_after_seasonal_pause(self):
+        self.coordinator.async_set_updated_data(replace(STATE, power=False))
+        await self.coordinator._device_lock.acquire()
+        pause = asyncio.create_task(self.coordinator.async_set_paused(True))
+        await asyncio.sleep(0)
+        command = asyncio.create_task(self.fan.async_turn_on())
+        await asyncio.sleep(0)
+        self.coordinator._device_lock.release()
+        await pause
+        with self.assertRaises(HomeAssistantError):
+            await command
+        self.client.power.assert_not_awaited()
 
     async def write(self, device, properties):
         fields = {

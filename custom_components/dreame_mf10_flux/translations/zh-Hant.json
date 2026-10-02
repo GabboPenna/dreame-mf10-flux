@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "換季停用"
+      },
       "child_lock": {
         "name": "兒童鎖"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "風扇已換季停用。傳送命令前請先恢復使用。"
+    },
+    "fan_still_running": {
+      "message": "停用前請關閉風扇或拔掉電源。暫停連線不會關閉裝置。"
+    },
+    "resume_failed": {
+      "message": "無法連接風扇。請重新接通電源後重試。裝置仍保持停用。"
+    },
     "command_failed": {
       "message": "無法確認指令。重試前請檢查風扇狀態。"
     },

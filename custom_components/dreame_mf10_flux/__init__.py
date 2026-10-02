@@ -12,6 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import AuthenticationError, CloudError, FluxClient
 from .const import CONF_DEVICE_ID, CONF_REGION, DOMAIN, PLATFORMS
 from .coordinator import FluxCoordinator
+from .season import FluxSeason
 
 
 @dataclass(slots=True)
@@ -47,8 +48,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: FluxEntry) -> bool:
     account.users += 1
     coordinator = None
     try:
-        device = await account.client.device(entry.data[CONF_DEVICE_ID])
-        coordinator = FluxCoordinator(hass, entry, account.client, device)
+        season = FluxSeason(hass, entry.entry_id)
+        await season.async_load(entry.data[CONF_DEVICE_ID])
+        device = (
+            season.device
+            if season.paused
+            else await account.client.device(entry.data[CONF_DEVICE_ID])
+        )
+        coordinator = FluxCoordinator(hass, entry, account.client, device, season=season)
         await coordinator.usage.async_load()
         await coordinator.async_config_entry_first_refresh()
         entry.runtime_data = FluxRuntime(coordinator, key)

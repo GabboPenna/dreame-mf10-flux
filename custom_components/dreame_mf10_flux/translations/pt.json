@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Fora de época"
+      },
       "child_lock": {
         "name": "Bloqueio infantil"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "O ventilador está fora de época. Reative-o antes de enviar comandos."
+    },
+    "fan_still_running": {
+      "message": "Desligue o ventilador antes de o colocar fora de época. A suspensão não desliga o dispositivo."
+    },
+    "resume_failed": {
+      "message": "Não é possível contactar o ventilador. Volte a ligá-lo à corrente e tente novamente. Continua fora de época."
+    },
     "command_failed": {
       "message": "Não foi possível confirmar o comando. Verifique o estado da ventoinha antes de tentar novamente."
     },

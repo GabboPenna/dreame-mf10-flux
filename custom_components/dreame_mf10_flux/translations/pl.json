@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Poza sezonem"
+      },
       "child_lock": {
         "name": "Blokada rodzicielska"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "Wentylator jest poza sezonem. Wznów jego działanie przed wysłaniem poleceń."
+    },
+    "fan_still_running": {
+      "message": "Wyłącz wentylator lub odłącz go od zasilania przed wstrzymaniem. Wstrzymanie nie wyłącza urządzenia."
+    },
+    "resume_failed": {
+      "message": "Wentylator jest nieosiągalny. Podłącz zasilanie i spróbuj ponownie. Pozostaje poza sezonem."
+    },
     "command_failed": {
       "message": "Nie udało się potwierdzić polecenia. Sprawdź stan wentylatora przed ponowną próbą."
     },

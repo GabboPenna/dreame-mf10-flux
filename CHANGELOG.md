@@ -1,6 +1,19 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.2.0 - 2026-10-02
+
+- Add a per-fan **Out of season** configuration switch. Suspend polling and
+  commands while the fan is stored, including after Home Assistant restarts.
+- Keep the switch and saved operating-hour totals available without cloud
+  access. Device telemetry is unavailable, not misleadingly reported as zero.
+- Refuse suspension when the fan is known to be running. Suspension never
+  sends a power command; switch off or unplug the device first.
+- Resume with a read only. An unreachable fan stays suspended; expired account
+  credentials offer reauthentication. Queued pre-suspension commands are rejected.
+- Include all twelve UI locales, identifier-free suspension diagnostics and
+  offline tests for restart, concurrency, failed resume and storage failures.
+
 ## 1.1.1 — 2026-09-23
 
 - Add a read-only sensor for days until pre-filter cleaning, using Dreame's cloud

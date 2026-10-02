@@ -24,6 +24,7 @@ from .api import (
     RateLimited,
 )
 from .const import CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL, DOMAIN, NAME
+from .season import FluxSeason
 from .usage import FluxUsage
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,7 +43,13 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
     """Serialize device operations and publish only meaningful state changes."""
 
     def __init__(
-        self, hass: HomeAssistant, entry: ConfigEntry, client: FluxClient, device: Device
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        client: FluxClient,
+        device: Device,
+        *,
+        season: FluxSeason | None = None,
     ) -> None:
         super().__init__(
             hass,
@@ -56,6 +63,9 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
         )
         self.client = client
         self.device = device
+        self.season = season or FluxSeason(hass, entry.entry_id)
+        self._poll_interval = self.update_interval
+        self._command_generation = 0
         self._device_lock = asyncio.Lock()
         self.last_poll_ms = 0.0
         self.last_successful_update: datetime | None = None
@@ -67,8 +77,52 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
         self.command_failures = 0
         self.consecutive_command_failures = 0
         self.usage = FluxUsage(hass, entry.entry_id, self.update_interval.total_seconds() * 2 + 30)
+        if self.season.paused:
+            self.update_interval = None
 
-    async def _read(self) -> FanState:
+    @property
+    def paused(self) -> bool:
+        return self.season.paused
+
+    async def async_set_paused(self, paused: bool) -> None:
+        """Suspend locally or resume with a read; never change the fan's power."""
+        async with self._device_lock:
+            if paused == self.paused:
+                return
+            if paused:
+                if self.last_update_success and self.data.online is not False and self.data.power:
+                    raise HomeAssistantError(
+                        translation_domain=DOMAIN, translation_key="fan_still_running"
+                    )
+                await self.season.async_save(True, self.device)
+                self._command_generation += 1
+                self.update_interval = None
+                self.usage.unavailable()
+                self.async_set_updated_data(FanState(online=None))
+            else:
+                try:
+                    state = await self._read(observe_usage=False)
+                except AuthenticationError as err:
+                    self.config_entry.async_start_reauth(self.hass)
+                    raise HomeAssistantError(
+                        translation_domain=DOMAIN, translation_key="authentication_failed"
+                    ) from err
+                except CloudError as err:
+                    raise HomeAssistantError(
+                        translation_domain=DOMAIN, translation_key="resume_failed"
+                    ) from err
+                if state.online is not True:
+                    self.usage.unavailable()
+                    raise HomeAssistantError(
+                        translation_domain=DOMAIN, translation_key="resume_failed"
+                    )
+                await self.season.async_save(False, self.device)
+                self._command_generation += 1
+                self.update_interval = self._poll_interval
+                self.usage.observe(state.power)
+                self.async_set_updated_data(state)
+
+    async def _read(self, *, observe_usage: bool = True) -> FanState:
         started = monotonic()
         try:
             device, state = await self.client.snapshot(self.device.did)
@@ -89,7 +143,8 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
                     registered.id, name=device.name or NAME, sw_version=device.firmware
                 )
         self.device = device
-        self.usage.observe(state.power if state.online is not False else None)
+        if observe_usage:
+            self.usage.observe(state.power if state.online is not False else None)
         return state
 
     async def async_shutdown(self) -> None:
@@ -99,6 +154,8 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
     async def _async_update_data(self) -> FanState:
         try:
             async with self._device_lock:
+                if self.paused:
+                    return FanState(online=None)
                 return await self._read()
         except AuthenticationError as err:
             raise ConfigEntryAuthFailed(
@@ -118,7 +175,12 @@ class FluxCoordinator(DataUpdateCoordinator[FanState]):
         oscillation: Oscillation | None = None,
     ) -> None:
         """Serialize state-dependent decisions, writes and bounded confirmation reads."""
+        generation = self._command_generation
+        if self.paused:
+            raise HomeAssistantError(translation_domain=DOMAIN, translation_key="out_of_season")
         async with self._device_lock:
+            if self.paused or generation != self._command_generation:
+                raise HomeAssistantError(translation_domain=DOMAIN, translation_key="out_of_season")
             started = monotonic()
             self.commands += 1
             try:

@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Out of season"
+      },
       "child_lock": {
         "name": "Child lock"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "The fan is out of season. Resume it before sending commands."
+    },
+    "fan_still_running": {
+      "message": "Switch off or unplug the fan before putting it out of season. Suspension does not switch off the device."
+    },
+    "resume_failed": {
+      "message": "Cannot reach the fan. Reconnect its power and try again. It remains out of season."
+    },
     "command_failed": {
       "message": "The command could not be confirmed. Check the fan state before trying again."
     },

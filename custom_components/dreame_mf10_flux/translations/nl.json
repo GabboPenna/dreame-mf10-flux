@@ -93,6 +93,9 @@
       }
     },
     "switch": {
+      "out_of_season": {
+        "name": "Buiten seizoen"
+      },
       "child_lock": {
         "name": "Kinderslot"
       },
@@ -128,6 +131,15 @@
     }
   },
   "exceptions": {
+    "out_of_season": {
+      "message": "De ventilator is buiten seizoen. Activeer hem voordat je opdrachten verstuurt."
+    },
+    "fan_still_running": {
+      "message": "Zet de ventilator uit of haal de stekker eruit voordat je hem pauzeert. Pauzeren schakelt het apparaat niet uit."
+    },
+    "resume_failed": {
+      "message": "Ventilator niet bereikbaar. Sluit de voeding weer aan en probeer opnieuw. Hij blijft buiten seizoen."
+    },
     "command_failed": {
       "message": "De opdracht kon niet worden bevestigd. Controleer de ventilator voordat je het opnieuw probeert."
     },
