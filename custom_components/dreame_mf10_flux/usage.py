@@ -1,14 +1,14 @@
 """Observed running hours with persistent totals. Copyright 2026 Gabriele Pennacchia."""
 
 from collections.abc import Callable
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime
 from math import isfinite
 from time import monotonic
-from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 
@@ -30,7 +30,7 @@ class FluxUsage:
         self._unsub_midnight: Callable[[], None] | None = None
 
     def _day(self, now: datetime) -> str:
-        return now.astimezone(ZoneInfo(self.hass.config.time_zone)).date().isoformat()
+        return dt_util.as_local(now).date().isoformat()
 
     async def async_load(self) -> None:
         data = await self.store.async_load()
@@ -102,11 +102,7 @@ class FluxUsage:
             wall_elapsed = (now - previous_at).total_seconds()
             if was_on and 0 <= elapsed <= self.max_gap and abs(wall_elapsed - elapsed) < 2:
                 self.total_seconds += elapsed
-                midnight = datetime.combine(
-                    now.astimezone(ZoneInfo(self.hass.config.time_zone)).date(),
-                    time.min,
-                    ZoneInfo(self.hass.config.time_zone),
-                ).astimezone(UTC)
+                midnight = dt_util.start_of_local_day(dt_util.as_local(now)).astimezone(UTC)
                 self.today_seconds += min(
                     elapsed, max(0, (now - max(previous_at, midnight)).total_seconds())
                 )

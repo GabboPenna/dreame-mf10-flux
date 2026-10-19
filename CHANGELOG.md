@@ -1,6 +1,12 @@
 <!-- Copyright 2026 Gabriele Pennacchia -->
 # Changelog
 
+## 1.2.1 - 2026-10-19
+
+- Use Home Assistant's already loaded local timezone for operating-hour day
+  boundaries, avoiding synchronous timezone-file reads on the event loop.
+- Preserve local-midnight splitting and daylight-saving behavior.
+
 ## 1.2.0 - 2026-10-02
 
 - Add a per-fan **Out of season** configuration switch. Suspend polling and
