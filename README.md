@@ -28,13 +28,28 @@ It uses asynchronous requests, one shared account session and batched state read
 
 ## Install with HACS
 
+Dreame MF10 Flux is included in the default HACS catalog following
+[approval of the HACS submission](https://github.com/hacs/default/pull/11190).
+You can search for it directly; adding a custom repository is not required.
+
 [Open the repository in HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=GabboPenna&repository=dreame-mf10-flux&category=integration)
 
-1. Open HACS and choose **Custom repositories**.
-2. Add `https://github.com/GabboPenna/dreame-mf10-flux` as an **Integration**.
-3. Download **Dreame MF10 Flux** and restart Home Assistant.
+1. Open **HACS** and search for **Dreame MF10 Flux**.
+2. Open its catalog entry and download the integration.
+3. Restart Home Assistant.
 4. Open **Settings → Devices & services → Add integration → Dreame MF10 Flux**.
 5. Enter your Dreamehome account and account region, then select your fan.
+
+### Fallback: custom repository
+
+If the integration does not appear in your HACS catalog, refresh HACS first.
+You can also add it manually:
+
+1. Open the HACS menu and choose **Custom repositories**.
+2. Add `https://github.com/GabboPenna/dreame-mf10-flux` as an **Integration**.
+3. Download **Dreame MF10 Flux**, then continue from the restart step above.
+
+### Manual installation
 
 For manual installation, copy `custom_components/dreame_mf10_flux` into your
 Home Assistant `custom_components` directory and restart Home Assistant.
